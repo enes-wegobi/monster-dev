@@ -1,4 +1,4 @@
-import { Controller, Get, Redirect, Req, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Redirect, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
@@ -14,7 +14,7 @@ export class AuthController {
   async twitchAuthRedirect(@Req() req, @Res() res: any) {
     console.log(req.user);
     if(req?.user?.accessToken ){
-      return { url: 'http://localhost:3000/form' }; 
+      return { url: 'http://localhost:3000/form?name=enes' }; 
     }else {
       return { url: 'http://localhost:3000/404' }; 
     }
