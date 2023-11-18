@@ -1,4 +1,4 @@
-import { Controller, Get, Redirect, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Redirect, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
@@ -10,12 +10,22 @@ export class AuthController {
 
   @Get('twitch/callback')
   @UseGuards(AuthGuard('twitch'))
-  async twitchAuthRedirect(@Req() req) {
+  @Redirect('http://localhost:3000/form', 302)
+  async twitchAuthRedirect(@Req() req, @Res() res: any) {
     console.log(req.user);
+    if(req?.user?.accessToken ){
+      return { url: 'http://localhost:3000/form' }; 
+    }else {
+      return { url: 'http://localhost:3000/404' }; 
+    }
+/*
+    return res.redirect('http://localhost:3000/form');
     return {
       message: 'Authentication successful!',
       user: req.user,
     };
+*/
+
   }
 
   @Get('google')
