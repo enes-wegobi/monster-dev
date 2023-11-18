@@ -14,6 +14,7 @@ export class AuthController {
   async twitchAuthRedirect(@Req() req, @Res() res: any) {
     console.log(req.user);
     if(req?.user?.accessToken ){
+      console.log(req?.user?.accessToken);
       return { url: 'http://localhost:3000/form?name=enes' }; 
     }else {
       return { url: 'http://localhost:3000/404' }; 
