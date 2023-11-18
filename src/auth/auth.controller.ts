@@ -12,7 +12,7 @@ export class AuthController {
   @UseGuards(AuthGuard('twitch'))
   @Redirect('http://localhost:3000/form', 302)
   async twitchAuthRedirect(@Req() req, @Res() res: any) {
-    console.log(req.user);
+    console.log(req);
     if(req?.user?.accessToken ){
       console.log(req?.user?.accessToken);
       return { url: 'http://localhost:3000/form?name=enes' }; 
@@ -31,12 +31,21 @@ export class AuthController {
 
   @Get('google')
   @UseGuards(AuthGuard('google'))
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async googleAuth(@Req() req) {}
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
+  @Redirect('http://localhost:3000/form', 302)
   async googleAuthRedirect(@Req() req) {
+    console.log(req);
+    if(req?.user?.accessToken ){
+      console.log(req?.user?.accessToken);
+      return { url: 'http://localhost:3000/form?name=enes' }; 
+    }else {
+      return { url: 'http://localhost:3000/404' }; 
+    }
     return {
       message: 'Google authentication successful',
       user: req.user,
