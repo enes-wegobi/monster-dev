@@ -1,14 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TwitchClient } from 'src/twitch/twitch.client';
 import { UserService } from 'src/users/user.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EventType } from 'src/domain/enum/event.enum';
+import { TwitchChannelCreateEvent } from 'src/domain/event/twitch-channel-create.event';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private userService: UserService,
     private twitchClient: TwitchClient,
     private configService: ConfigService,
+    private eventEmitter: EventEmitter2,
   ) {}
   /*
 {
@@ -43,16 +49,26 @@ export class AuthService {
     if (!twitchUser) {
       return this.configService.get<string>('REDIRECT_URL_NOT_FOUND');
     }
+    const broadcasterId = twitchUser.id;
 
-    const user = twitchUser.email
-      ? await this.userService.findUserWithEmail(twitchUser.email)
-      : undefined;
-
-    const redirectUrl = this.configService.get<string>('REDIRECT_URL');
-
-    return user
-      ? redirectUrl + user.id
-      : this.configService.get<string>('REDIRECT_URL_NOT_FOUND');
+    if (twitchUser.email) {
+      const user = await this.userService.findUserWithEmail(twitchUser.email);
+      if (user) {
+        await this.eventEmitter.emitAsync(
+          EventType.TWITCH_CHANNEL_CREATE,
+          new TwitchChannelCreateEvent({
+            accessToken,
+            refreshToken,
+            broadcasterId,
+          }),
+        );
+        const redirectUrl = this.configService.get<string>('REDIRECT_URL');
+        return redirectUrl + user.id;
+      } else {
+        this.logger.error('TWITCH_AUTH_CALLBACK || user mail not matched.');
+        return this.configService.get<string>('REDIRECT_URL_NOT_FOUND');
+      }
+    }
   }
 
   async handleGoogleAuth(request: any) {
