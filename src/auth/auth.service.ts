@@ -37,7 +37,9 @@ export class AuthService {
       const user = await this.userService.findUserWithEmail(twitchUser.email);
       if (user) {
         if (user.twitchChannel) {
-          this.logger.log('User already added twitch channel. User: ' + user.name );
+          this.logger.log(
+            'User already added twitch channel. User: ' + user.name,
+          );
           return;
         }
 
@@ -55,10 +57,12 @@ export class AuthService {
           }),
         );
         const redirectUrl = this.configService.get<string>('REDIRECT_URL');
-        return redirectUrl + user.id;
+        return { url: redirectUrl + user.id };
       } else {
         this.logger.error('TWITCH_AUTH_CALLBACK || user mail not matched.');
-        return this.configService.get<string>('REDIRECT_URL_NOT_FOUND');
+        return {
+          url: this.configService.get<string>('REDIRECT_URL_NOT_FOUND'),
+        };
       }
     }
   }

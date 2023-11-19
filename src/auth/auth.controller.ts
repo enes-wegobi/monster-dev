@@ -1,10 +1,4 @@
-import {
-  Controller,
-  Get,
-  Redirect,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Redirect, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 
@@ -20,7 +14,7 @@ export class AuthController {
   @UseGuards(AuthGuard('twitch'))
   @Redirect('http://localhost:3000/form', 302)
   async twitchAuthRedirect(@Req() req) {
-    this.authService.handleTwitchAuth(req);
+    return this.authService.handleTwitchAuth(req);
   }
 
   @Get('google')
@@ -31,6 +25,6 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   @Redirect('http://localhost:3000/form', 302)
   async googleAuthRedirect(@Req() req) {
-    this.authService.handleGoogleAuth(req);
+    return this.authService.handleGoogleAuth(req);
   }
 }
