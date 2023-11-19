@@ -6,6 +6,7 @@ import { ChannelService } from '../service/channel.service';
 import { TwitchClient } from 'src/twitch/twitch.client';
 import { ChannelType } from 'src/domain/enum/channel-type.enum';
 import { CreateChannelDto } from '../dto/create-channel.dto';
+import { UserService } from 'src/users/user.service';
 
 @Injectable()
 export class TwitchChannelCreateListener {
@@ -14,6 +15,7 @@ export class TwitchChannelCreateListener {
   constructor(
     private channelService: ChannelService,
     private twitchClient: TwitchClient,
+    private userService: UserService,
   ) {}
 
   @OnEvent(EventType.TWITCH_CHANNEL_CREATE)
@@ -24,9 +26,15 @@ export class TwitchChannelCreateListener {
       twitchChannelCreateEvent;
     if (!broadcasterId || !refreshToken || !accessToken || !userId) {
       this.logger.error(
-        'TWITCH_CHANNEL_CREATE_EVENT there is no broadcasterId refreshToken accessToken',
+        'TWITCH_CHANNEL_CREATE_EVENT there is no broadcasterId refreshToken accessToken userId',
       );
       return;
+    }
+    const doesChannelExist = await this.channelService.doesChannelExist(broadcasterId);
+    if(doesChannelExist){
+      this.logger.log(
+        `TWITCH_CHANNEL_CREATE_EVENT this channel: ${broadcasterId} already exist`,
+      );
     }
 
     const totalFollowersResponse =
@@ -61,6 +69,7 @@ export class TwitchChannelCreateListener {
     };
     const channel = await this.channelService.create(channelDto);
     if (channel) {
+      await this.userService.updateUser(userId, {twitchChannel: channel._id});
       this.logger.log('TWITCH_CHANNEL_CREATE_EVENT Channel created');
     }
   }

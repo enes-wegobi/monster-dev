@@ -27,9 +27,11 @@ export class User {
   @Prop()
   photo: string;
 
-  @Prop({ type: [{ type: ChannelSchema, ref: 'Channel' }] })
-  channels: Channel[];
+  @Prop()
+  twitchChannel: string;
 
+  @Prop()
+  youtubeChannel: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

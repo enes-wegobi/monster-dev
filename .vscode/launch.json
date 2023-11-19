@@ -10,13 +10,13 @@
         "runtimeArgs": ["--nolazy", "-r", "ts-node/register"],
         "sourceMaps": true,
         "cwd": "${workspaceFolder}",
-        "protocol": "inspector",
         "env": {
           "NODE_ENV": "development"
         },
         "outputCapture": "std",
-        "skipFiles": ["<node_internals>/**/*.js"]
+        "skipFiles": ["<node_internals>/**/*.js"],
       }
+      
     ]
   }
   

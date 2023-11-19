@@ -16,17 +16,6 @@ export class AuthService {
     private configService: ConfigService,
     private eventEmitter: EventEmitter2,
   ) {}
-  /*
-{
-    "data": [
-        {
-           channelId "id": "991666634",
-            channel name "login": "krkmazmrv",
-            "profile_image_url": "https://static-cdn.jtvnw.net/user-default-pictures-uv/ead5c8b2-a4c9-4724-b1dd-9f00b46cbd3d-profile_image-300x300.png",
-            "email": "krkmaz.mrv@gmail.com",
-        }
-    ]
-}*/
 
   async handleTwitchAuth(request: any) {
     const accessToken = request?.user?.accessToken;
@@ -37,7 +26,7 @@ export class AuthService {
     }
 
     const data = await this.twitchClient.getUser(accessToken);
-    const twitchUser = data[0];
+    const twitchUser = data.data[0];
 
     if (!twitchUser) {
       return this.configService.get<string>('REDIRECT_URL_NOT_FOUND');
@@ -47,6 +36,10 @@ export class AuthService {
     if (twitchUser.email) {
       const user = await this.userService.findUserWithEmail(twitchUser.email);
       if (user) {
+        if (user.twitchChannel) {
+          this.logger.log('User already added twitch channel. User: ' + user.name );
+          return;
+        }
 
         const photo = twitchUser.profile_image_url;
         await this.userService.updateUser(user.id, { photo });

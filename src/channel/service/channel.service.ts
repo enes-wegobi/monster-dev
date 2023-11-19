@@ -9,8 +9,14 @@ export class ChannelService {
     @InjectModel(Channel.name) private channelModel: Model<Channel>,
   ) {}
 
-  async create(createChannelDto: CreateChannelDto): Promise<Channel> {
+  async create(createChannelDto: CreateChannelDto): Promise<any> {
     const createdChannel = new this.channelModel(createChannelDto);
     return createdChannel.save();
+  }
+  async doesChannelExist(channelId: string): Promise<boolean> {
+    const channel = await this.channelModel
+      .findOne({ channelId: channelId })
+      .exec();
+    return !!channel;
   }
 }
