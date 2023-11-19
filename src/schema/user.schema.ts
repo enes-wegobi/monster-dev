@@ -21,12 +21,14 @@ export class User {
   @Prop({ required: true })
   phoneNumber: string;
 
-  @Prop({ required: true })
+  @Prop({ default: true })
+  canJoin: boolean;
+
+  @Prop()
   photo: string;
 
   @Prop({ type: [{ type: ChannelSchema, ref: 'Channel' }] })
   channels: Channel[];
-
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
