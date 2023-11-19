@@ -29,6 +29,7 @@ export class User {
 
   @Prop({ type: [{ type: ChannelSchema, ref: 'Channel' }] })
   channels: Channel[];
+
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

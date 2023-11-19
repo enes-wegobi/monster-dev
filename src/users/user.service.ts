@@ -5,7 +5,7 @@ import { User } from 'src/schema/user.schema';
 import { Model } from 'mongoose';
 
 @Injectable()
-export class UsersService {
+export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -24,7 +24,7 @@ export class UsersService {
     return await this.userModel.findOne({ email: email });
   }
 
-  async findOne(id: string) {
+  async getUser(id: string) {
     const user = await this.userModel.findById(id);
     if(!user){
       throw new BadRequestException('user not found!');
