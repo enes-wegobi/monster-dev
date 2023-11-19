@@ -20,17 +20,10 @@ export class AuthService {
 {
     "data": [
         {
-            "id": "991666634",
-            "login": "krkmazmrv",
-            "display_name": "krkmazmrv",
-            "type": "",
-            "broadcaster_type": "",
-            "description": "",
+           channelId "id": "991666634",
+            channel name "login": "krkmazmrv",
             "profile_image_url": "https://static-cdn.jtvnw.net/user-default-pictures-uv/ead5c8b2-a4c9-4724-b1dd-9f00b46cbd3d-profile_image-300x300.png",
-            "offline_image_url": "",
-            "view_count": 0,
             "email": "krkmaz.mrv@gmail.com",
-            "created_at": "2023-11-18T11:18:00Z"
         }
     ]
 }*/
@@ -54,9 +47,15 @@ export class AuthService {
     if (twitchUser.email) {
       const user = await this.userService.findUserWithEmail(twitchUser.email);
       if (user) {
+
+        const photo = twitchUser.profile_image_url;
+        await this.userService.updateUser(user.id, { photo });
+
         await this.eventEmitter.emitAsync(
           EventType.TWITCH_CHANNEL_CREATE,
           new TwitchChannelCreateEvent({
+            channelName: twitchUser.login,
+            userId: user.id,
             accessToken,
             refreshToken,
             broadcasterId,

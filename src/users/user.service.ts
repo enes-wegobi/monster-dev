@@ -31,4 +31,9 @@ export class UserService {
     }
     return user;
   }
+
+  async updateUser(userId: string, updatedFields: Partial<User>): Promise<User> {
+    const user = await this.userModel.findByIdAndUpdate(userId, updatedFields, { new: true });
+    return user;
+  }
 }
