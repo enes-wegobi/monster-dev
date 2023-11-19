@@ -9,9 +9,10 @@ export class ChannelService {
     @InjectModel(Channel.name) private channelModel: Model<Channel>,
   ) {}
 
-  async create(createChannelDto: CreateChannelDto): Promise<any> {
+  async create(createChannelDto: CreateChannelDto) {
     const createdChannel = new this.channelModel(createChannelDto);
-    return createdChannel.save();
+    const channel = await createdChannel.save();
+    return channel.toObject();
   }
   async doesChannelExist(channelId: string): Promise<boolean> {
     const channel = await this.channelModel

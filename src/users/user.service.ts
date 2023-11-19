@@ -17,23 +17,30 @@ export class UserService {
       return;
     }
     const createdUser = new this.userModel(createUserDto);
-    return createdUser.save();
+    const user = await createdUser.save();
+    return user.toObject();
   }
 
   async findUserWithEmail(email: string) {
-    return await this.userModel.findOne({ email: email });
+    const user = await this.userModel.findOne({ email: email });
+    return user.toObject();
   }
 
   async getUser(id: string) {
     const user = await this.userModel.findById(id);
-    if(!user){
+    if (!user) {
       throw new BadRequestException('user not found!');
     }
-    return user;
+    return user.toObject();
   }
 
-  async updateUser(userId: string, updatedFields: Partial<User>): Promise<User> {
-    const user = await this.userModel.findByIdAndUpdate(userId, updatedFields, { new: true });
-    return user;
+  async updateUser(
+    userId: string,
+    updatedFields: Partial<User>,
+  ): Promise<User> {
+    const user = await this.userModel.findByIdAndUpdate(userId, updatedFields, {
+      new: true,
+    });
+    return user.toObject();
   }
 }

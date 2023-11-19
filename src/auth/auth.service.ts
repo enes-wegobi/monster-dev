@@ -25,8 +25,7 @@ export class AuthService {
       return this.configService.get<string>('REDIRECT_URL_NOT_FOUND');
     }
 
-    const data = await this.twitchClient.getUser(accessToken);
-    const twitchUser = data.data[0];
+    const twitchUser = await this.getTwitchUser(accessToken);
 
     if (!twitchUser) {
       return this.configService.get<string>('REDIRECT_URL_NOT_FOUND');
@@ -43,21 +42,20 @@ export class AuthService {
           return;
         }
 
-        const photo = twitchUser.profile_image_url;
-        await this.userService.updateUser(user.id, { photo });
+        await this.updateUserPhoto(user._id, twitchUser.profile_image_url);
 
         await this.eventEmitter.emitAsync(
           EventType.TWITCH_CHANNEL_CREATE,
           new TwitchChannelCreateEvent({
             channelName: twitchUser.login,
-            userId: user.id,
+            userId: user._id,
             accessToken,
             refreshToken,
             broadcasterId,
           }),
         );
         const redirectUrl = this.configService.get<string>('REDIRECT_URL');
-        return { url: redirectUrl + user.id };
+        return { url: redirectUrl + user._id };
       } else {
         this.logger.error('TWITCH_AUTH_CALLBACK || user mail not matched.');
         return {
@@ -65,6 +63,14 @@ export class AuthService {
         };
       }
     }
+  }
+
+  private async getTwitchUser(accessToken: string) {
+    const data = await this.twitchClient.getUser(accessToken);
+    return data.data[0];
+  }
+  private async updateUserPhoto(userId: string, photoUrl: string) {
+    await this.userService.updateUser(userId, { photo: photoUrl });
   }
 
   async handleGoogleAuth(request: any) {

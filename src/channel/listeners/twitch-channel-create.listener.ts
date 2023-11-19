@@ -30,8 +30,9 @@ export class TwitchChannelCreateListener {
       );
       return;
     }
-    const doesChannelExist = await this.channelService.doesChannelExist(broadcasterId);
-    if(doesChannelExist){
+    const doesChannelExist =
+      await this.channelService.doesChannelExist(broadcasterId);
+    if (doesChannelExist) {
       this.logger.log(
         `TWITCH_CHANNEL_CREATE_EVENT this channel: ${broadcasterId} already exist`,
       );
@@ -69,7 +70,9 @@ export class TwitchChannelCreateListener {
     };
     const channel = await this.channelService.create(channelDto);
     if (channel) {
-      await this.userService.updateUser(userId, {twitchChannel: channel._id});
+      await this.userService.updateUser(userId, {
+        twitchChannel: channel._id.toString(),
+      });
       this.logger.log('TWITCH_CHANNEL_CREATE_EVENT Channel created');
     }
   }
