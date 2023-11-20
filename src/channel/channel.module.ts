@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ChannelService } from './service/channel.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Channel, ChannelSchema } from '../schema/channel.schema';
+import { Channel, ChannelSchema } from '../domain/schema/channel.schema';
 import { TwitchModule } from 'src/twitch/twitch.module';
 import { UsersModule } from 'src/users/user.module';
 import { GoogleModule } from 'src/google/google.module';

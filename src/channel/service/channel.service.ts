@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Channel } from '../../schema/channel.schema';
+import { Channel } from '../../domain/schema/channel.schema';
 import { CreateChannelDto } from '../dto/create-channel.dto';
 @Injectable()
 export class ChannelService {
