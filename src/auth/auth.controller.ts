@@ -31,7 +31,7 @@ export class AuthController {
   @Get('google')
   @Redirect('', 302)
   async googleAuth2() {
-    const url = await this.googleOAuth2Client.generateUrl();
+    const url = this.googleOAuth2Client.generateUrl();
     return { url };
   }
 

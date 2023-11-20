@@ -4,6 +4,8 @@ import { google } from 'googleapis';
 
 @Injectable()
 export class GoogleOAuth2Client {
+  private readonly logger = new Logger(GoogleOAuth2Client.name);
+
   private readonly oauth2Client = new google.auth.OAuth2(
     this.configService.get<string>('GOOGLE_CLIENT_ID'),
     this.configService.get<string>('GOOGLE_CLIENT_SECRET'),
