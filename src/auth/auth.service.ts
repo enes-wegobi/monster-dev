@@ -99,19 +99,6 @@ export class AuthService {
           }),
         );
       }
-      /*
-      {
-    "sub": "102600450137362746990",
-    "name": "Enes Ozel",
-    "given_name": "Enes",
-    "family_name": "Ozel",
-    "picture": "https://lh3.googleusercontent.com/a/ACg8ocIBv-hlPQ25Rb7PG65IruSJAix7LOti06SILVyMNuYy9kQ=s96-c",
-    "email": "enesozel.eo@gmail.com",
-    "email_verified": true,
-    "locale": "tr"
-}
-      */
-
       return { url: 'http://localhost:3000/form?name=enes' };
     } else {
       return { url: 'http://localhost:3000/404' };

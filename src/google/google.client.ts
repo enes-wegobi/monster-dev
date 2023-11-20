@@ -32,14 +32,14 @@ export class GoogleClient {
         .pipe(
           catchError((error: AxiosError) => {
             this.logger.error(error.response.data);
-            throw 'An error happened!';
+            throw new Error('An error happened!');
           }),
         ),
     );
 
     const channelInfo = data.items[0];
     if (!channelInfo) {
-      throw 'Channel not found!';
+      throw new Error('Channel not found!');
     }
 
     const { viewCount, subscriberCount, videoCount } = channelInfo.statistics;
@@ -88,7 +88,7 @@ export class GoogleClient {
           .pipe(
             catchError((error: AxiosError) => {
               this.logger.error(error.response.data);
-              throw 'An error happened!';
+              throw new Error('An error happened!');
             }),
           ),
       );
@@ -129,7 +129,7 @@ export class GoogleClient {
           .pipe(
             catchError((error: AxiosError) => {
               this.logger.error(error.response.data);
-              throw 'An error happened!';
+              throw new Error('An error happened!');
             }),
           ),
       );
@@ -163,7 +163,7 @@ export class GoogleClient {
         .pipe(
           catchError((error: AxiosError) => {
             this.logger.error(error.response.data);
-            throw 'An error happened!';
+            throw new Error('An error happened!');
           }),
         ),
     );

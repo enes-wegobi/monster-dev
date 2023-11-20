@@ -28,7 +28,7 @@ export class TwitchClient {
         .pipe(
           catchError((error: AxiosError) => {
             this.logger.error(error.response.data);
-            throw 'An error happened!';
+            throw new Error('An error happened!');
           }),
         ),
     );
@@ -70,7 +70,7 @@ export class TwitchClient {
             }
            */
             this.logger.error(error.response.data);
-            throw 'An error happened!';
+            throw new Error('An error happened!');
           }),
         ),
     );
@@ -124,7 +124,7 @@ export class TwitchClient {
         .pipe(
           catchError((error: AxiosError) => {
             this.logger.error(error.response.data);
-            throw 'An error happened!';
+            throw new Error('An error happened!');
           }),
         ),
     );

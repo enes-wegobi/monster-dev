@@ -23,6 +23,9 @@ export class UserService {
 
   async findUserWithEmail(email: string) {
     const user = await this.userModel.findOne({ email: email });
+    if (!user) {
+     return
+    }
     return user.toObject();
   }
 

@@ -35,7 +35,6 @@ export class YoutubeChannelCreateListener {
     const {
       title,
       playlistId,
-      image,
       totalViewCount,
       totalSubscribers,
       totalVideos,
