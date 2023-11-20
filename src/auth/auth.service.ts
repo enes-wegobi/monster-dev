@@ -4,9 +4,11 @@ import { TwitchClient } from 'src/twitch/twitch.client';
 import { UserService } from 'src/users/user.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EventType } from 'src/domain/enum/event.enum';
-import { TwitchChannelCreateEvent } from 'src/domain/event/twitch-channel-create.event';
 import { GoogleClient } from 'src/google/google.client';
 import { YoutubeChannelCreateEvent } from 'src/domain/event/youtube-channel-create.event';
+import { CreateUserDto } from '../users/dto/create-user.dto';
+import { TwitchChannelCreateService } from '../channel/service/twitch-channel-create.service';
+import { TwitchChannelCreateDto } from '../channel/dto/twitch-channel-create.dto';
 
 @Injectable()
 export class AuthService {
@@ -18,6 +20,7 @@ export class AuthService {
     private googleClient: GoogleClient,
     private configService: ConfigService,
     private eventEmitter: EventEmitter2,
+    private twitchChannelCreateService: TwitchChannelCreateService,
   ) {}
 
   async handleTwitchAuth(request: any) {
@@ -35,37 +38,37 @@ export class AuthService {
     }
     const broadcasterId = twitchUser.id;
 
-    if (twitchUser.email) {
-      const user = await this.userService.findUserWithEmail(twitchUser.email);
-      if (user) {
-        if (user.twitchChannel) {
-          this.logger.log(
-            'User already added twitch channel. User: ' + user.name,
-          );
-          return;
-        }
-
-        await this.updateUserPhoto(user._id, twitchUser.profile_image_url);
-
-        await this.eventEmitter.emitAsync(
-          EventType.TWITCH_CHANNEL_CREATE,
-          new TwitchChannelCreateEvent({
-            channelName: twitchUser.login,
-            userId: user._id,
-            accessToken,
-            refreshToken,
-            broadcasterId,
-          }),
-        );
-        const redirectUrl = this.configService.get<string>('REDIRECT_URL');
-        return { url: redirectUrl + user._id };
-      } else {
-        this.logger.error('TWITCH_AUTH_CALLBACK || user mail not matched.');
-        return {
-          url: this.configService.get<string>('REDIRECT_URL_NOT_FOUND'),
-        };
-      }
+    if (!twitchUser.email) {
+      return this.configService.get<string>('REDIRECT_URL_NOT_FOUND');
     }
+    const createUserDto: CreateUserDto = {
+      email: twitchUser.email,
+      photo: twitchUser.profile_image_url,
+    };
+    const user = await this.userService.partialCreate(createUserDto);
+    if (user.twitchChannel) {
+      this.logger.log('User already added twitch channel. User: ' + user.name);
+      return this.configService.get<string>('REDIRECT_URL_NOT_FOUND');
+    }
+
+    const twitchChannelCreateDto: TwitchChannelCreateDto = {
+      accessToken,
+      refreshToken,
+      broadcasterId,
+      channelName: twitchUser.login,
+      userId: user._id.toString(),
+    };
+    const channel = await this.twitchChannelCreateService.createTwitchChannel(
+      twitchChannelCreateDto,
+    );
+
+    if (channel) {
+      await this.userService.updateUser(user._id.toString(), {
+        twitchChannel: channel._id.toString(),
+      });
+    }
+    const redirectUrl = this.configService.get<string>('REDIRECT_URL');
+    return { url: redirectUrl + user._id };
   }
 
   private async getTwitchUser(accessToken: string) {

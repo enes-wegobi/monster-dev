@@ -8,6 +8,16 @@ import { Model } from 'mongoose';
 export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
+  async partialCreate(createUserDto: CreateUserDto) {
+    const existingUser = await this.findUserWithEmail(createUserDto.email);
+    if (existingUser) {
+      return existingUser;
+    }
+    const createdUser = new this.userModel(createUserDto);
+    const user = await createdUser.save();
+    return user.toObject();
+  }
+
   async create(createUserDto: CreateUserDto): Promise<User> {
     const existingUser = await this.findUserWithEmail(createUserDto.email);
     if (existingUser) {
@@ -23,10 +33,7 @@ export class UserService {
 
   async findUserWithEmail(email: string) {
     const user = await this.userModel.findOne({ email: email });
-    if (!user) {
-     return
-    }
-    return user.toObject();
+    return user ? user.toObject() : undefined;
   }
 
   async getUser(id: string) {
