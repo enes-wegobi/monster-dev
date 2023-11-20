@@ -8,32 +8,10 @@ import { Model } from 'mongoose';
 export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
-  async partialCreate(createUserDto: CreateUserDto) {
-    const existingUser = await this.findUserWithEmail(createUserDto.email);
-    if (existingUser) {
-      return existingUser;
-    }
+  async create(createUserDto: CreateUserDto) {
     const createdUser = new this.userModel(createUserDto);
-    const user = await createdUser.save();
-    return user.toObject();
-  }
-
-  async create(createUserDto: CreateUserDto): Promise<User> {
-    const existingUser = await this.findUserWithEmail(createUserDto.email);
-    if (existingUser) {
-      if (!existingUser.canJoin) {
-        throw new BadRequestException('This mail already in use.');
-      }
-      return;
-    }
-    const createdUser = new this.userModel(createUserDto);
-    const user = await createdUser.save();
-    return user.toObject();
-  }
-
-  async findUserWithEmail(email: string) {
-    const user = await this.userModel.findOne({ email: email });
-    return user ? user.toObject() : undefined;
+    const newUser = await createdUser.save();
+    return newUser.toObject();
   }
 
   async getUser(id: string) {
@@ -41,16 +19,6 @@ export class UserService {
     if (!user) {
       throw new BadRequestException('user not found!');
     }
-    return user.toObject();
-  }
-
-  async updateUser(
-    userId: string,
-    updatedFields: Partial<User>,
-  ): Promise<User> {
-    const user = await this.userModel.findByIdAndUpdate(userId, updatedFields, {
-      new: true,
-    });
     return user.toObject();
   }
 }

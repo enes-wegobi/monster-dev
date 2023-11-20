@@ -1,6 +1,7 @@
 export class TwitchChannelCreateDto {
   channelName: string;
-  userId: string;
+  channelImage: string;
+  channelEmail: string;
   accessToken: string;
   refreshToken: string;
   broadcasterId: string;

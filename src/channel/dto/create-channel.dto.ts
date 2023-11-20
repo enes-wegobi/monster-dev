@@ -3,10 +3,12 @@ import { ChannelType } from 'src/domain/enum/channel-type.enum';
 export class CreateChannelDto {
   name: string;
   channelId: string;
-  tokenInfo: TokenInfoDto;
+  channelImage: string;
+  channelEmail: string;
   channelType: ChannelType;
   statistic: StatisticDto;
   videos?: VideoStatisticDto[];
+  tokenInfo: TokenInfoDto;
 }
 export class VideoStatisticDto {
   channelId: string;

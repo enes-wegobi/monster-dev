@@ -13,7 +13,7 @@ export class TwitchClient {
     private readonly httpService: HttpService,
     private configService: ConfigService,
   ) {}
-  
+
   async getUser(accessToken: string): Promise<any> {
     const authorization = this.populateAccessToken(accessToken);
     const clientId = this.configService.get<string>('TWITCH_CLIENT_ID');

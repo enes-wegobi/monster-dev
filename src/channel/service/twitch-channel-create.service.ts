@@ -1,9 +1,9 @@
-import { Injectable, Logger } from "@nestjs/common";
-import { ChannelService } from "./channel.service";
-import { TwitchChannelCreateDto } from "../dto/twitch-channel-create.dto";
-import { TwitchClient } from "../../twitch/twitch.client";
-import { CreateChannelDto } from "../dto/create-channel.dto";
-import { ChannelType } from "../../domain/enum/channel-type.enum";
+import { Injectable, Logger } from '@nestjs/common';
+import { ChannelService } from './channel.service';
+import { TwitchChannelCreateDto } from '../dto/twitch-channel-create.dto';
+import { TwitchClient } from '../../twitch/twitch.client';
+import { CreateChannelDto } from '../dto/create-channel.dto';
+import { ChannelType } from '../../domain/enum/channel-type.enum';
 
 @Injectable()
 export class TwitchChannelCreateService {
@@ -15,8 +15,14 @@ export class TwitchChannelCreateService {
   ) {}
 
   async createTwitchChannel(twitchChannelCreateDto: TwitchChannelCreateDto) {
-    const { accessToken, refreshToken, broadcasterId, userId, channelName } =
-      twitchChannelCreateDto;
+    const {
+      accessToken,
+      refreshToken,
+      broadcasterId,
+      channelName,
+      channelImage,
+      channelEmail,
+    } = twitchChannelCreateDto;
     const doesChannelExist =
       await this.channelService.doesChannelExist(broadcasterId);
 
@@ -44,6 +50,8 @@ export class TwitchChannelCreateService {
     const channelDto: CreateChannelDto = {
       channelId: broadcasterId,
       name: channelName,
+      channelEmail,
+      channelImage,
       tokenInfo: {
         accessToken,
         refreshToken,

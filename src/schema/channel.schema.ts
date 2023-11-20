@@ -15,6 +15,12 @@ export class Channel {
   @Prop()
   channelId: string;
 
+  @Prop()
+  channelImage: string;
+
+  @Prop()
+  channelEmail: string;
+
   @Prop({ required: true })
   channelType: ChannelType;
 

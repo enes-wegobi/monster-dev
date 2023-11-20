@@ -13,4 +13,8 @@ export class CreateUserDto {
   phoneNumber?: string;
   @IsString()
   photo?: string;
+  @IsString()
+  twitchChannel?: string;
+  @IsString()
+  youtubeChannel?: string;
 }
