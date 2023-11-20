@@ -13,7 +13,7 @@ export class GoogleOAuth2Client {
   );
 
   constructor(private configService: ConfigService) {}
-  async generateUrl() {
+   generateUrl() {
     const scopes = this.configService.get<string>('GOOGLE_SCOPE').split(',');
     const url = this.oauth2Client.generateAuthUrl({
       // 'online' (default) or 'offline' (gets refresh_token)
