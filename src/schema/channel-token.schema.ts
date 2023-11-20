@@ -8,7 +8,7 @@ export class ChannelToken {
   @Prop({ required: true })
   accessToken: string;
 
-  @Prop({ required: true })
+  @Prop()
   refreshToken: string;
 }
 

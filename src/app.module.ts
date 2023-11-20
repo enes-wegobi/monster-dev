@@ -8,6 +8,7 @@ import { MongoDbModule } from './config/mongo/mongodb.module';
 import { UsersModule } from './users/user.module';
 import { TwitchModule } from './twitch/twitch.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { GoogleModule } from './google/google.module';
 
 
 @Module({
@@ -18,7 +19,8 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     MongoDbModule,
     UsersModule,
     TwitchModule,
-    EventEmitterModule.forRoot()
+    EventEmitterModule.forRoot(),
+    GoogleModule
   ],
   controllers: [AppController],
   providers: [AppService],

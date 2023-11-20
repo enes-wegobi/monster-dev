@@ -5,6 +5,8 @@ import { UserService } from 'src/users/user.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EventType } from 'src/domain/enum/event.enum';
 import { TwitchChannelCreateEvent } from 'src/domain/event/twitch-channel-create.event';
+import { GoogleClient } from 'src/google/google.client';
+import { YoutubeChannelCreateEvent } from 'src/domain/event/youtube-channel-create.event';
 
 @Injectable()
 export class AuthService {
@@ -13,6 +15,7 @@ export class AuthService {
   constructor(
     private userService: UserService,
     private twitchClient: TwitchClient,
+    private googleClient: GoogleClient,
     private configService: ConfigService,
     private eventEmitter: EventEmitter2,
   ) {}
@@ -73,10 +76,42 @@ export class AuthService {
     await this.userService.updateUser(userId, { photo: photoUrl });
   }
 
-  async handleGoogleAuth(request: any) {
-    console.log(request);
-    if (request?.user?.accessToken) {
-      console.log(request?.user?.accessToken);
+  async handleGoogleAuth(tokens: any) {
+    if (tokens.access_token) {
+      const accessToken = tokens.access_token;
+      const googleUser = await this.googleClient.getUserInfo(accessToken);
+      const user = await this.userService.findUserWithEmail(googleUser.email);
+      if (user) {
+        if (user.youtubeChannel) {
+          this.logger.log(
+            'User already added youtube channel. User: ' + user.name,
+          );
+          return;
+        }
+        await this.updateUserPhoto(user._id, googleUser.picture);
+
+        await this.eventEmitter.emitAsync(
+          EventType.YOUTUBE_CHANNEL_CREATE,
+          new YoutubeChannelCreateEvent({
+            userId: user._id,
+            accessToken,
+            email: user.email,
+          }),
+        );
+      }
+      /*
+      {
+    "sub": "102600450137362746990",
+    "name": "Enes Ozel",
+    "given_name": "Enes",
+    "family_name": "Ozel",
+    "picture": "https://lh3.googleusercontent.com/a/ACg8ocIBv-hlPQ25Rb7PG65IruSJAix7LOti06SILVyMNuYy9kQ=s96-c",
+    "email": "enesozel.eo@gmail.com",
+    "email_verified": true,
+    "locale": "tr"
+}
+      */
+
       return { url: 'http://localhost:3000/form?name=enes' };
     } else {
       return { url: 'http://localhost:3000/404' };

@@ -75,13 +75,6 @@ export class TwitchClient {
         ),
     );
     return data;
-    /*
-  {
-    "total": 10691776,
-    "data": [],
-    "pagination": {}
-}
-  */
   }
 
   async getTwitchChannelInfo(accessToken: string, broadcasterId: string) {

@@ -24,18 +24,23 @@ export class TwitchChannelCreateListener {
   ) {
     const { accessToken, refreshToken, broadcasterId, userId, channelName } =
       twitchChannelCreateEvent;
+
     if (!broadcasterId || !refreshToken || !accessToken || !userId) {
       this.logger.error(
         'TWITCH_CHANNEL_CREATE_EVENT there is no broadcasterId refreshToken accessToken userId',
       );
       return;
     }
+    this.logger.log(
+      'TWITCH_CHANNEL_CREATE_EVENT started for channelName: ' + channelName,
+    );
     const doesChannelExist =
       await this.channelService.doesChannelExist(broadcasterId);
     if (doesChannelExist) {
       this.logger.log(
         `TWITCH_CHANNEL_CREATE_EVENT this channel: ${broadcasterId} already exist`,
       );
+      return;
     }
 
     const totalFollowersResponse =

@@ -6,6 +6,15 @@ export class CreateChannelDto {
   tokenInfo: TokenInfoDto;
   channelType: ChannelType;
   statistic: StatisticDto;
+  videos?: VideoStatisticDto[];
+}
+export class VideoStatisticDto {
+  channelId: string;
+  viewCount: number;
+  likeCount: number;
+  dislikeCount: number;
+  favoriteCount: number;
+  commentCount: number;
 }
 export class StatisticDto {
   subscriberCount: number;
@@ -13,7 +22,7 @@ export class StatisticDto {
   viewCount: number;
 }
 
-export class TokenInfoDto{
+export class TokenInfoDto {
   accessToken: string;
-  refreshToken: string;
+  refreshToken?: string;
 }
