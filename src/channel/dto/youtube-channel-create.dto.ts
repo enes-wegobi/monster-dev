@@ -1,7 +1,7 @@
 export class YoutubeChannelCreateDto {
   accessToken: string;
-  picture: string;
-  email: string;
+  channelImage: string;
+  channelEmail: string;
 
   constructor(payload: YoutubeChannelCreateDto) {
     Object.assign(this, payload);

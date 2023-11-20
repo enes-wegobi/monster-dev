@@ -6,6 +6,8 @@ import { TwitchChannelCreateService } from '../channel/service/twitch-channel-cr
 import { TwitchChannelCreateDto } from '../channel/dto/twitch-channel-create.dto';
 import { YoutubeChannelCreateService } from '../channel/service/youtube-channel-create.service';
 import { YoutubeChannelCreateDto } from '../channel/dto/youtube-channel-create.dto';
+import { ChannelService } from '../channel/service/channel.service';
+import { ChannelType } from '../domain/enum/channel-type.enum';
 
 @Injectable()
 export class AuthService {
@@ -15,6 +17,7 @@ export class AuthService {
     private twitchClient: TwitchClient,
     private googleClient: GoogleClient,
     private configService: ConfigService,
+    private channelService: ChannelService,
     private twitchChannelCreateService: TwitchChannelCreateService,
     private youtubeChannelCreateService: YoutubeChannelCreateService,
   ) {}
@@ -39,10 +42,12 @@ export class AuthService {
       login: channelName,
     } = twitchUser;
 
-    //todo check channel already added with email
-    const channel = {};
+    const channel = await this.channelService.doesChannelExist(
+      channelEmail,
+      ChannelType.TWITCH,
+    );
     if (channel) {
-      this.logger.log('User already added youtube channel.');
+      this.logger.log('channel already added.');
       return this.configService.get<string>('REDIRECT_URL_NOT_FOUND');
     }
 
@@ -73,19 +78,21 @@ export class AuthService {
     const accessToken = tokens.access_token;
     if (accessToken) {
       const googleUser = await this.googleClient.getUserInfo(accessToken);
-      const { email, picture } = googleUser;
+      const { email: channelEmail, picture: channelImage } = googleUser;
 
-      //todo check channel already added with email
-      const channel = {};
+      const channel = await this.channelService.doesChannelExist(
+        channelEmail,
+        ChannelType.YOUTUBE,
+      );
       if (channel) {
-        this.logger.log('User already added youtube channel.');
+        this.logger.log('channel already added.');
         return this.configService.get<string>('REDIRECT_URL_NOT_FOUND');
       }
 
       const youtubeChannelCreateDto: YoutubeChannelCreateDto = {
         accessToken,
-        email,
-        picture,
+        channelEmail,
+        channelImage,
       };
 
       const createdChannel =

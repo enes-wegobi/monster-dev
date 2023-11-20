@@ -23,15 +23,7 @@ export class TwitchChannelCreateService {
       channelImage,
       channelEmail,
     } = twitchChannelCreateDto;
-    const doesChannelExist =
-      await this.channelService.doesChannelExist(broadcasterId);
 
-    if (doesChannelExist) {
-      this.logger.log(
-        `TWITCH_CHANNEL_CREATE_EVENT this channel: ${broadcasterId} already exist`,
-      );
-      return;
-    }
     const totalFollowersResponse =
       await this.twitchClient.getChannelTotalFollowers(
         accessToken,

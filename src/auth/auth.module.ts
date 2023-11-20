@@ -6,9 +6,16 @@ import { AuthService } from './auth.service';
 import { UsersModule } from 'src/users/user.module';
 import { TwitchModule } from 'src/twitch/twitch.module';
 import { GoogleModule } from 'src/google/google.module';
+import { ChannelModule } from '../channel/channel.module';
 
 @Module({
-  imports: [PassportModule, UsersModule, TwitchModule, GoogleModule],
+  imports: [
+    PassportModule,
+    UsersModule,
+    TwitchModule,
+    GoogleModule,
+    ChannelModule,
+  ],
   controllers: [AuthController],
   providers: [TwitchStrategy, AuthService],
 })

@@ -15,7 +15,11 @@ import { TwitchChannelCreateService } from './service/twitch-channel-create.serv
     GoogleModule,
     UsersModule,
   ],
-  controllers: [],
+  exports: [
+    ChannelService,
+    YoutubeChannelCreateService,
+    TwitchChannelCreateService,
+  ],
   providers: [
     ChannelService,
     YoutubeChannelCreateService,

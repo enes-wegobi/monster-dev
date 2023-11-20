@@ -12,8 +12,6 @@ export class CreateUserDto {
   @IsMobilePhone()
   phoneNumber?: string;
   @IsString()
-  photo?: string;
-  @IsString()
   twitchChannel?: string;
   @IsString()
   youtubeChannel?: string;
