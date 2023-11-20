@@ -39,6 +39,6 @@ export class AuthController {
   @Redirect('', 302)
   async googleAuthRedirect(@Query() code) {
     const { tokens } = await this.googleOAuth2Client.getToken(code);
-    return this.authService.handleGoogleAuth(tokens);
+    return await this.authService.handleGoogleAuth(tokens);
   }
 }
