@@ -36,9 +36,9 @@ export class AuthController {
   }
 
   @Get('google/callback')
-  @Redirect('http://localhost:3000/form', 302)
-  async googleAuthRedirect(@Query() code, @Req() req) {
+  @Redirect('', 302)
+  async googleAuthRedirect(@Query() code) {
     const { tokens } = await this.googleOAuth2Client.getToken(code);
-    return this.authService.handleGoogleAuth(tokens);
+    return await this.authService.handleGoogleAuth(tokens);
   }
 }

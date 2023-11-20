@@ -1,4 +1,4 @@
 export enum ChannelType {
-    TWITCH,
-    YOUTUBE,
+  TWITCH = 'TWITCH',
+  YOUTUBE = 'YOUTUBE',
 }

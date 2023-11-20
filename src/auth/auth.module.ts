@@ -2,15 +2,21 @@ import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { TwitchStrategy } from './strategy/twitch.strategy';
 import { AuthController } from './auth.controller';
-import { GoogleStrategy } from './strategy/google.strategy';
 import { AuthService } from './auth.service';
 import { UsersModule } from 'src/users/user.module';
 import { TwitchModule } from 'src/twitch/twitch.module';
 import { GoogleModule } from 'src/google/google.module';
+import { ChannelModule } from '../channel/channel.module';
 
 @Module({
-  imports: [PassportModule, UsersModule, TwitchModule, GoogleModule],
+  imports: [
+    PassportModule,
+    UsersModule,
+    TwitchModule,
+    GoogleModule,
+    ChannelModule,
+  ],
   controllers: [AuthController],
-  providers: [TwitchStrategy, GoogleStrategy, AuthService],
+  providers: [TwitchStrategy, AuthService],
 })
 export class AuthModule {}

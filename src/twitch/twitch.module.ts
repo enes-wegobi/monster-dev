@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TwitchClient } from './twitch.client';
 import { HttpModule } from '@nestjs/axios';
-import { TwitchController } from './twitch.controller';
 @Module({
   imports: [
     HttpModule.registerAsync({
@@ -11,7 +10,6 @@ import { TwitchController } from './twitch.controller';
       }),
     }),
   ],
-  controllers: [TwitchController],
   providers: [TwitchClient],
   exports: [TwitchClient],
 })

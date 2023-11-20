@@ -1,28 +1,29 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TwitchClient } from 'src/twitch/twitch.client';
-import { UserService } from 'src/users/user.service';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { EventType } from 'src/domain/enum/event.enum';
-import { TwitchChannelCreateEvent } from 'src/domain/event/twitch-channel-create.event';
 import { GoogleClient } from 'src/google/google.client';
-import { YoutubeChannelCreateEvent } from 'src/domain/event/youtube-channel-create.event';
+import { TwitchChannelCreateService } from '../channel/service/twitch-channel-create.service';
+import { TwitchChannelCreateDto } from '../channel/dto/twitch-channel-create.dto';
+import { YoutubeChannelCreateService } from '../channel/service/youtube-channel-create.service';
+import { YoutubeChannelCreateDto } from '../channel/dto/youtube-channel-create.dto';
+import { ChannelService } from '../channel/service/channel.service';
+import { ChannelType } from '../domain/enum/channel-type.enum';
 
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
 
   constructor(
-    private userService: UserService,
     private twitchClient: TwitchClient,
     private googleClient: GoogleClient,
     private configService: ConfigService,
-    private eventEmitter: EventEmitter2,
+    private channelService: ChannelService,
+    private twitchChannelCreateService: TwitchChannelCreateService,
+    private youtubeChannelCreateService: YoutubeChannelCreateService,
   ) {}
 
   async handleTwitchAuth(request: any) {
     const accessToken = request?.user?.accessToken;
-    const refreshToken = request?.user?.refreshToken;
 
     if (!accessToken) {
       return this.configService.get<string>('REDIRECT_URL_NOT_FOUND');
@@ -30,78 +31,79 @@ export class AuthService {
 
     const twitchUser = await this.getTwitchUser(accessToken);
 
-    if (!twitchUser) {
+    if (!twitchUser || !twitchUser.email) {
       return this.configService.get<string>('REDIRECT_URL_NOT_FOUND');
     }
-    const broadcasterId = twitchUser.id;
 
-    if (twitchUser.email) {
-      const user = await this.userService.findUserWithEmail(twitchUser.email);
-      if (user) {
-        if (user.twitchChannel) {
-          this.logger.log(
-            'User already added twitch channel. User: ' + user.name,
-          );
-          return;
-        }
+    const {
+      id: broadcasterId,
+      email: channelEmail,
+      profile_image_url: channelImage,
+      login: channelName,
+    } = twitchUser;
 
-        await this.updateUserPhoto(user._id, twitchUser.profile_image_url);
-
-        await this.eventEmitter.emitAsync(
-          EventType.TWITCH_CHANNEL_CREATE,
-          new TwitchChannelCreateEvent({
-            channelName: twitchUser.login,
-            userId: user._id,
-            accessToken,
-            refreshToken,
-            broadcasterId,
-          }),
-        );
-        const redirectUrl = this.configService.get<string>('REDIRECT_URL');
-        return { url: redirectUrl + user._id };
-      } else {
-        this.logger.error('TWITCH_AUTH_CALLBACK || user mail not matched.');
-        return {
-          url: this.configService.get<string>('REDIRECT_URL_NOT_FOUND'),
-        };
-      }
+    const channel = await this.channelService.doesChannelExist(
+      channelEmail,
+      ChannelType.TWITCH,
+    );
+    if (channel) {
+      this.logger.log('channel already added.');
+      return this.configService.get<string>('REDIRECT_URL_NOT_FOUND');
     }
+
+    const twitchChannelCreateDto: TwitchChannelCreateDto = {
+      accessToken,
+      refreshToken: request?.user?.refreshToken,
+      broadcasterId,
+      channelName,
+      channelEmail,
+      channelImage,
+    };
+
+    const createdChannel =
+      await this.twitchChannelCreateService.createTwitchChannel(
+        twitchChannelCreateDto,
+      );
+
+    const redirectUrl = this.configService.get<string>('REDIRECT_URL');
+    return { url: redirectUrl + createdChannel._id };
   }
 
   private async getTwitchUser(accessToken: string) {
     const data = await this.twitchClient.getUser(accessToken);
     return data.data[0];
   }
-  private async updateUserPhoto(userId: string, photoUrl: string) {
-    await this.userService.updateUser(userId, { photo: photoUrl });
-  }
 
   async handleGoogleAuth(tokens: any) {
-    if (tokens.access_token) {
-      const accessToken = tokens.access_token;
+    const accessToken = tokens.access_token;
+    if (accessToken) {
       const googleUser = await this.googleClient.getUserInfo(accessToken);
-      const user = await this.userService.findUserWithEmail(googleUser.email);
-      if (user) {
-        if (user.youtubeChannel) {
-          this.logger.log(
-            'User already added youtube channel. User: ' + user.name,
-          );
-          return;
-        }
-        await this.updateUserPhoto(user._id, googleUser.picture);
+      const { email: channelEmail, picture: channelImage } = googleUser;
 
-        await this.eventEmitter.emitAsync(
-          EventType.YOUTUBE_CHANNEL_CREATE,
-          new YoutubeChannelCreateEvent({
-            userId: user._id,
-            accessToken,
-            email: user.email,
-          }),
-        );
+      const channel = await this.channelService.doesChannelExist(
+        channelEmail,
+        ChannelType.YOUTUBE,
+      );
+      if (channel) {
+        this.logger.log('channel already added.');
+        return this.configService.get<string>('REDIRECT_URL_NOT_FOUND');
       }
-      return { url: 'http://localhost:3000/form?name=enes' };
+
+      const youtubeChannelCreateDto: YoutubeChannelCreateDto = {
+        accessToken,
+        channelEmail,
+        channelImage,
+      };
+
+      const createdChannel =
+        await this.youtubeChannelCreateService.createYoutubeChannel(
+          youtubeChannelCreateDto,
+        );
+
+      const redirectUrl = this.configService.get<string>('REDIRECT_URL');
+      return { url: redirectUrl + createdChannel._id };
     } else {
-      return { url: 'http://localhost:3000/404' };
+      return { url: this.configService.get<string>('REDIRECT_URL_NOT_FOUND') };
     }
   }
 }

@@ -152,7 +152,7 @@ export class GoogleClient {
     return videoStatistics;
   }
 
-  async getUserInfo(accessToken) {
+  async getUserInfo(accessToken: string) {
     const response = await firstValueFrom(
       this.httpService
         .get<any>('https://www.googleapis.com/oauth2/v3/userinfo', {

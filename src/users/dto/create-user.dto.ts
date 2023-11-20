@@ -2,13 +2,17 @@ import { IsString, IsEmail, IsMobilePhone } from 'class-validator';
 
 export class CreateUserDto {
   @IsString()
-  name: string;
+  name?: string;
   @IsString()
-  birthdate: string;
+  birthdate?: string;
   @IsString()
-  gender: string;
+  gender?: string;
   @IsEmail()
   email: string;
   @IsMobilePhone()
-  phoneNumber: string;
+  phoneNumber?: string;
+  @IsString()
+  twitchChannel?: string;
+  @IsString()
+  youtubeChannel?: string;
 }

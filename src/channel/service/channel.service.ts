@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Channel } from '../../schema/channel.schema';
+import { Channel } from '../../domain/schema/channel.schema';
 import { CreateChannelDto } from '../dto/create-channel.dto';
+import { ChannelType } from '../../domain/enum/channel-type.enum';
 @Injectable()
 export class ChannelService {
   constructor(
@@ -14,9 +15,9 @@ export class ChannelService {
     const channel = await createdChannel.save();
     return channel.toObject();
   }
-  async doesChannelExist(channelId: string): Promise<boolean> {
+  async doesChannelExist(channelEmail: string, channelType: ChannelType) {
     const channel = await this.channelModel
-      .findOne({ channelId: channelId })
+      .findOne({ channelEmail, channelType })
       .exec();
     return !!channel;
   }
