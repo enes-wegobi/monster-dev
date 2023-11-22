@@ -2,8 +2,21 @@ import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { catchError, firstValueFrom } from 'rxjs';
 import { AxiosError } from 'axios';
-import { BEARER } from 'src/domain/model/contstant';
+import { BEARER, TWITCH } from 'src/domain/model/contstant';
 import { ConfigService } from '@nestjs/config';
+import {
+  AFTER,
+  CHANNEL_URL,
+  FIRST,
+  TWITCH_BASE_URL,
+  USER_URL,
+  VIDEO_URL,
+} from './twitch-api.constant';
+import {
+  ERROR_GET_CHANNEL_INFO,
+  ERROR_GET_USER_INFO,
+  ERROR_GET_VIDEOS,
+} from '../domain/model/exception.constant';
 
 @Injectable()
 export class TwitchClient {
@@ -15,20 +28,17 @@ export class TwitchClient {
   ) {}
 
   async getUser(accessToken: string): Promise<any> {
-    const authorization = this.populateAccessToken(accessToken);
-    const clientId = this.configService.get<string>('TWITCH_CLIENT_ID');
     const { data } = await firstValueFrom(
       this.httpService
-        .get<any>('https://api.twitch.tv/helix/users', {
-          headers: {
-            Authorization: authorization,
-            'Client-Id': clientId,
-          },
+        .get<any>(TWITCH_BASE_URL + USER_URL, {
+          headers: this.getHeader(accessToken),
         })
         .pipe(
           catchError((error: AxiosError) => {
-            this.logger.error(error.response.data);
-            throw new Error('An error happened!');
+            this.logger.error(
+              error.response?.data || TWITCH + ERROR_GET_USER_INFO,
+            );
+            throw new Error(TWITCH + ERROR_GET_USER_INFO);
           }),
         ),
     );
@@ -39,38 +49,17 @@ export class TwitchClient {
     accessToken: string,
     broadcasterId: string,
   ): Promise<any> {
-    const authorization = this.populateAccessToken(accessToken);
-    const clientId = this.configService.get<string>('TWITCH_CLIENT_ID');
     const { data } = await firstValueFrom(
       this.httpService
-        .get<any>(
-          `https://api.twitch.tv/helix/channels/followers?broadcaster_id=${broadcasterId}`,
-          {
-            headers: {
-              Authorization: authorization,
-              'Client-Id': clientId,
-            },
-          },
-        )
+        .get<any>(TWITCH_BASE_URL + CHANNEL_URL + broadcasterId, {
+          headers: this.getHeader(accessToken),
+        })
         .pipe(
           catchError((error: AxiosError) => {
-            //todo
-            /*
-            {
-              "error": "Unauthorized",
-              "status": 401,
-              "message": "Invalid OAuth token"
-            }
-            */
-            /*
-           {
-              "error": "Bad Request",
-              "status": 400,
-              "message": "Missing required parameter \"broadcaster_id\""
-            }
-           */
-            this.logger.error(error.response.data);
-            throw new Error('An error happened!');
+            this.logger.error(
+              error.response?.data || TWITCH + ERROR_GET_CHANNEL_INFO,
+            );
+            throw new Error(TWITCH + ERROR_GET_CHANNEL_INFO);
           }),
         ),
     );
@@ -107,31 +96,35 @@ export class TwitchClient {
     broadcasterId: string,
     cursor: string | null,
   ) {
-    const clientId = this.configService.get<string>('TWITCH_CLIENT_ID');
-    const authorization = this.populateAccessToken(accessToken);
-    const url = `https://api.twitch.tv/helix/videos?user_id=${broadcasterId}&first=100${
-      cursor ? `&after=${cursor}` : ''
-    }`;
-    const headers = {
-      'Client-ID': clientId,
-      Authorization: authorization,
-    };
+    const url =
+      TWITCH_BASE_URL +
+      VIDEO_URL +
+      broadcasterId +
+      FIRST +
+      (cursor ? AFTER + cursor : '');
+
     const { data } = await firstValueFrom(
       this.httpService
         .get<any>(url, {
-          headers,
+          headers: this.getHeader(accessToken),
         })
         .pipe(
           catchError((error: AxiosError) => {
-            this.logger.error(error.response.data);
-            throw new Error('An error happened!');
+            this.logger.error(
+              error.response?.data || TWITCH + ERROR_GET_VIDEOS,
+            );
+            throw new Error(TWITCH + ERROR_GET_VIDEOS);
           }),
         ),
     );
     return data;
   }
 
-  populateAccessToken(accessToken: string): string {
-    return BEARER + accessToken;
+  private getHeader(accessToken: string) {
+    const clientId = this.configService.get<string>('TWITCH_CLIENT_ID');
+    return {
+      Authorization: BEARER + accessToken,
+      'Client-ID': clientId,
+    };
   }
 }

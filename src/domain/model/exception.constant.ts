@@ -8,3 +8,5 @@ export const ERROR_ACCESS_TOKEN_NOT_FOUND = 'Access token not found.';
 export const ERROR_TWITCH_USER_NOT_FOUND = 'Twitch user or email not found.';
 export const ERROR_TWITCH_AUTH_GENERAL = 'Error in handleTwitchAuth: ';
 export const ERROR_GOOGLE_AUTH_GENERAL = 'Error in handleGoogleAuth: ';
+export const ERROR_VALIDATION = 'Error in Validation: ';
+export const ERROR_USER_NOT_FOUND = 'User not found.';

@@ -14,7 +14,12 @@ import {
   YOUTUBE_BASE_URL,
   YOUTUBE_OAUTH2_URL,
 } from './google-api.constant';
-import { APPLICATION_JSON, BEARER } from '../domain/model/contstant';
+import {
+  APPLICATION_JSON,
+  BEARER,
+  CHUNK_SIZE,
+  GOOGLE,
+} from '../domain/model/contstant';
 import {
   ERROR_CHANNEL_NOT_FOUND,
   ERROR_GET_CHANNEL_INFO,
@@ -43,22 +48,21 @@ export class GoogleClient {
             key: apiKey,
             mine: true,
           },
-          headers: {
-            Authorization: BEARER + accessToken,
-            Accept: APPLICATION_JSON,
-          },
+          headers: this.getHeader(accessToken),
         })
         .pipe(
           catchError((error: AxiosError) => {
-            this.logger.error(error.response.data);
-            throw new Error(ERROR_GET_CHANNEL_INFO);
+            this.logger.error(
+              error.response.data || GOOGLE + ERROR_GET_CHANNEL_INFO,
+            );
+            throw new Error(GOOGLE + ERROR_GET_CHANNEL_INFO);
           }),
         ),
     );
 
     const channelInfo = data.items[0];
     if (!channelInfo) {
-      throw new Error(ERROR_CHANNEL_NOT_FOUND);
+      throw new Error(GOOGLE + ERROR_CHANNEL_NOT_FOUND);
     }
 
     const {
@@ -104,15 +108,14 @@ export class GoogleClient {
               maxResults: 50,
               pageToken: nextPageToken,
             },
-            headers: {
-              Authorization: BEARER + accessToken,
-              Accept: APPLICATION_JSON,
-            },
+            headers: this.getHeader(accessToken),
           })
           .pipe(
             catchError((error: AxiosError) => {
-              this.logger.error(error.response.data);
-              throw new Error(ERROR_GET_VIDEO_IDS);
+              this.logger.error(
+                error.response.data || GOOGLE + ERROR_GET_VIDEO_IDS,
+              );
+              throw new Error(GOOGLE + ERROR_GET_VIDEO_IDS);
             }),
           ),
       );
@@ -131,11 +134,10 @@ export class GoogleClient {
     return videoIds;
   }
   async getVideos(videoIds: string[], accessToken: string) {
-    const chunkSize = 50;
     const apiKey = this.configService.get<string>('GOOGLE_API_KEY');
     const videoStatistics: any[] = [];
-    for (let i = 0; i < videoIds.length; i += chunkSize) {
-      const videoIdsChunk = videoIds.slice(i, i + chunkSize);
+    for (let i = 0; i < videoIds.length; i += CHUNK_SIZE) {
+      const videoIdsChunk = videoIds.slice(i, i + CHUNK_SIZE);
       const response = await firstValueFrom(
         this.httpService
           .get<any>(YOUTUBE_BASE_URL + VIDEO_URL, {
@@ -145,15 +147,14 @@ export class GoogleClient {
               id: videoIdsChunk.join(','),
               maxResults: 50,
             },
-            headers: {
-              Authorization: BEARER + accessToken,
-              Accept: APPLICATION_JSON,
-            },
+            headers: this.getHeader(accessToken),
           })
           .pipe(
             catchError((error: AxiosError) => {
-              this.logger.error(error.response.data);
-              throw new Error(ERROR_GET_VIDEOS);
+              this.logger.error(
+                error.response.data || GOOGLE + ERROR_GET_VIDEOS,
+              );
+              throw new Error(GOOGLE + ERROR_GET_VIDEOS);
             }),
           ),
       );
@@ -191,8 +192,12 @@ export class GoogleClient {
           }),
         ),
     );
-    if (response.status === 200) {
-      return response.data;
-    }
+    return response.data;
+  }
+  private getHeader(accessToken: string) {
+    return {
+      Authorization: BEARER + accessToken,
+      Accept: APPLICATION_JSON,
+    };
   }
 }

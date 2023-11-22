@@ -8,8 +8,9 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { USERS } from '../domain/model/contstant';
 
-@Controller('users')
+@Controller(USERS)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
