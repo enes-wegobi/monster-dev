@@ -23,7 +23,8 @@ export class AuthController {
     private authService: AuthService,
     private googleOAuth2Client: GoogleOAuth2Client,
   ) {}
-
+  //kanal ismi dönülecek
+  //usera şehir eklenecek
   @Get(TWITCH_AUTH_URL)
   @UseGuards(AuthGuard('twitch'))
   async twitchAuth(@Req() req: any) {}
