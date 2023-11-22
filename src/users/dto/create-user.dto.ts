@@ -1,4 +1,10 @@
-import { IsString, IsEmail, IsMobilePhone } from 'class-validator';
+import {
+  IsString,
+  IsEmail,
+  IsMobilePhone,
+  IsArray,
+  ArrayMinSize,
+} from 'class-validator';
 
 export class CreateUserDto {
   @IsString()
@@ -11,8 +17,8 @@ export class CreateUserDto {
   email: string;
   @IsMobilePhone()
   phoneNumber?: string;
-  @IsString()
-  twitchChannel?: string;
-  @IsString()
-  youtubeChannel?: string;
+  @IsArray()
+  @IsString({ each: true })
+  @ArrayMinSize(1)
+  channels?: string[];
 }

@@ -1,10 +1,10 @@
 export class TwitchChannelCreateDto {
-  channelName: string;
-  channelImage: string;
+  name: string;
+  image: string;
   channelEmail: string;
   accessToken: string;
   refreshToken: string;
-  broadcasterId: string;
+  externalId: string;
 
   constructor(payload: TwitchChannelCreateDto) {
     Object.assign(this, payload);

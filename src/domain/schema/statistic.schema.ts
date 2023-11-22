@@ -3,7 +3,7 @@ import { HydratedDocument } from 'mongoose';
 
 export type StatisticDocument = HydratedDocument<Statistic>;
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true, _id: false })
 export class Statistic {
   @Prop({ required: true, default: 0 })
   videoCount: number;

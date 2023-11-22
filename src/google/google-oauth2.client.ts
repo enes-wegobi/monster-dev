@@ -15,13 +15,12 @@ export class GoogleOAuth2Client {
   constructor(private configService: ConfigService) {}
   generateUrl() {
     const scopes = this.configService.get<string>('GOOGLE_SCOPE').split(',');
-    const url = this.oauth2Client.generateAuthUrl({
+    return this.oauth2Client.generateAuthUrl({
       // 'online' (default) or 'offline' (gets refresh_token)
       //access_type: 'offline',
       // If you only need one scope you can pass it as a string
       scope: scopes,
     });
-    return url;
   }
   async getToken(code) {
     return await this.oauth2Client.getToken(code);

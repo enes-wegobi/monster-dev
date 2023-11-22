@@ -36,10 +36,10 @@ export class AuthService {
     }
 
     const {
-      id: broadcasterId,
+      id: externalId,
       email: channelEmail,
-      profile_image_url: channelImage,
-      login: channelName,
+      profile_image_url: image,
+      login: name,
     } = twitchUser;
 
     const channel = await this.channelService.doesChannelExist(
@@ -54,10 +54,10 @@ export class AuthService {
     const twitchChannelCreateDto: TwitchChannelCreateDto = {
       accessToken,
       refreshToken: request?.user?.refreshToken,
-      broadcasterId,
-      channelName,
+      externalId,
+      name,
       channelEmail,
-      channelImage,
+      image,
     };
 
     const createdChannel =
@@ -78,7 +78,7 @@ export class AuthService {
     const accessToken = tokens.access_token;
     if (accessToken) {
       const googleUser = await this.googleClient.getUserInfo(accessToken);
-      const { email: channelEmail, picture: channelImage } = googleUser;
+      const { email: channelEmail, picture: image } = googleUser;
 
       const channel = await this.channelService.doesChannelExist(
         channelEmail,
@@ -92,7 +92,7 @@ export class AuthService {
       const youtubeChannelCreateDto: YoutubeChannelCreateDto = {
         accessToken,
         channelEmail,
-        channelImage,
+        image,
       };
 
       const createdChannel =

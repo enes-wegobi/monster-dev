@@ -15,23 +15,14 @@ export class TwitchChannelCreateService {
   ) {}
 
   async createTwitchChannel(twitchChannelCreateDto: TwitchChannelCreateDto) {
-    const {
-      accessToken,
-      refreshToken,
-      broadcasterId,
-      channelName,
-      channelImage,
-      channelEmail,
-    } = twitchChannelCreateDto;
+    const { accessToken, refreshToken, externalId, name, image, channelEmail } =
+      twitchChannelCreateDto;
 
     const totalFollowersResponse =
-      await this.twitchClient.getChannelTotalFollowers(
-        accessToken,
-        broadcasterId,
-      );
+      await this.twitchClient.getChannelTotalFollowers(accessToken, externalId);
     const channelInfo = await this.twitchClient.getTwitchChannelInfo(
       accessToken,
-      broadcasterId,
+      externalId,
     );
 
     if (!totalFollowersResponse || !channelInfo) {
@@ -40,15 +31,15 @@ export class TwitchChannelCreateService {
     }
 
     const channelDto: CreateChannelDto = {
-      channelId: broadcasterId,
-      name: channelName,
+      externalId,
+      name,
       channelEmail,
-      channelImage,
-      tokenInfo: {
+      image,
+      token: {
         accessToken,
         refreshToken,
       },
-      channelType: ChannelType.TWITCH,
+      type: ChannelType.TWITCH,
       statistic: {
         subscriberCount: totalFollowersResponse.total,
         videoCount: channelInfo.totalVideos,

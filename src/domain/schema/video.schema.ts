@@ -1,12 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 
-export type VideoStatisticDocument = HydratedDocument<VideoStatistic>;
+export type VideoDocument = HydratedDocument<Video>;
 
 @Schema({ timestamps: true })
-export class VideoStatistic {
+export class Video {
   @Prop({ required: true })
-  channelId: string;
+  externalId: string;
 
   @Prop({ required: true, default: 0 })
   viewCount: number;
@@ -24,5 +24,4 @@ export class VideoStatistic {
   commentCount: number;
 }
 
-export const VideoStatisticSchema =
-  SchemaFactory.createForClass(VideoStatistic);
+export const VideoSchema = SchemaFactory.createForClass(Video);

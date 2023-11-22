@@ -1,33 +1,37 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { HydratedDocument, Types } from 'mongoose';
+import { Channel } from './channel.schema';
 
 export type UserDocument = HydratedDocument<User>;
 
 @Schema({ timestamps: true })
 export class User {
-  @Prop()
+  @Prop({ required: true })
   name: string;
 
-  @Prop()
+  @Prop({ required: true })
   birthdate: string;
 
-  @Prop()
+  @Prop({ required: true })
   gender: string;
 
   @Prop({ required: true })
   email: string;
 
-  @Prop()
+  @Prop({ required: true })
   phoneNumber: string;
 
-  @Prop()
+  @Prop({ required: true })
   photo: string;
 
   @Prop()
-  twitchChannel: string;
+  hasYoutube: boolean;
 
   @Prop()
-  youtubeChannel: string;
+  hasTwitch: boolean;
+
+  @Prop([{ type: Types.ObjectId, ref: Channel, required: false }])
+  channels: Types.ObjectId[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

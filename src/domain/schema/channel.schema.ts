@@ -1,9 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { HydratedDocument, Types } from 'mongoose';
 import { ChannelType } from 'src/domain/enum/channel-type.enum';
 import { Statistic, StatisticSchema } from './statistic.schema';
-import { VideoStatistic, VideoStatisticSchema } from './video-statistic.schema';
-import { ChannelToken, ChannelTokenSchema } from './channel-token.schema';
+import { Token, TokenSchema } from './token.schema';
+import { Video } from "./video.schema";
 
 export type ChannelDocument = HydratedDocument<Channel>;
 
@@ -13,25 +13,25 @@ export class Channel {
   name: string;
 
   @Prop()
-  channelId: string;
+  externalId: string;
 
   @Prop()
-  channelImage: string;
+  image: string;
 
   @Prop()
   channelEmail: string;
 
   @Prop({ required: true })
-  channelType: ChannelType;
+  type: ChannelType;
 
   @Prop({ type: StatisticSchema, required: true })
   statistic: Statistic;
 
-  @Prop({ type: [VideoStatisticSchema] })
-  videos: VideoStatistic[];
+  @Prop([{ type: Types.ObjectId, ref: Video, required: false }])
+  videos: Types.ObjectId[];
 
-  @Prop({ type: ChannelTokenSchema, required: true })
-  tokenInfo: ChannelToken;
+  @Prop({ type: TokenSchema, required: true })
+  token: Token;
 }
 
 export const ChannelSchema = SchemaFactory.createForClass(Channel);

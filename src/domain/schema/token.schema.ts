@@ -1,10 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 
-export type ChannelTokenDocument = HydratedDocument<ChannelToken>;
+export type TokenDocument = HydratedDocument<Token>;
 
 @Schema({ timestamps: true, _id: false })
-export class ChannelToken {
+export class Token {
   @Prop({ required: true })
   accessToken: string;
 
@@ -12,4 +12,4 @@ export class ChannelToken {
   refreshToken: string;
 }
 
-export const ChannelTokenSchema = SchemaFactory.createForClass(ChannelToken);
+export const TokenSchema = SchemaFactory.createForClass(Token);

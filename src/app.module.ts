@@ -6,6 +6,7 @@ import { MongoDbModule } from './config/mongo/mongodb.module';
 import { UsersModule } from './users/user.module';
 import { TwitchModule } from './twitch/twitch.module';
 import { GoogleModule } from './google/google.module';
+import { VideoModule } from './video/video.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { GoogleModule } from './google/google.module';
     UsersModule,
     TwitchModule,
     GoogleModule,
+    VideoModule,
   ],
 })
 export class AppModule {}

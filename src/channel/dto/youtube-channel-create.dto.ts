@@ -1,6 +1,6 @@
 export class YoutubeChannelCreateDto {
   accessToken: string;
-  channelImage: string;
+  image: string;
   channelEmail: string;
 
   constructor(payload: YoutubeChannelCreateDto) {

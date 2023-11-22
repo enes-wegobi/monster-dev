@@ -15,9 +15,9 @@ export class ChannelService {
     const channel = await createdChannel.save();
     return channel.toObject();
   }
-  async doesChannelExist(channelEmail: string, channelType: ChannelType) {
+  async doesChannelExist(channelEmail: string, type: ChannelType) {
     const channel = await this.channelModel
-      .findOne({ channelEmail, channelType })
+      .findOne({ channelEmail, type })
       .exec();
     return !!channel;
   }

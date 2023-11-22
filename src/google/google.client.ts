@@ -3,6 +3,25 @@ import { HttpService } from '@nestjs/axios';
 import { catchError, firstValueFrom } from 'rxjs';
 import { AxiosError } from 'axios';
 import { ConfigService } from '@nestjs/config';
+import {
+  CHANEL_PART,
+  CHANNEL_URL,
+  CONTENT_DETAILS,
+  PLAYLIST_URL,
+  STATISTICS,
+  USER_INFO_URL,
+  VIDEO_URL,
+  YOUTUBE_BASE_URL,
+  YOUTUBE_OAUTH2_URL,
+} from './google-api.constant';
+import { APPLICATION_JSON, BEARER } from '../domain/model/contstant';
+import {
+  ERROR_CHANNEL_NOT_FOUND,
+  ERROR_GET_CHANNEL_INFO,
+  ERROR_GET_USER_INFO,
+  ERROR_GET_VIDEO_IDS,
+  ERROR_GET_VIDEOS,
+} from '../domain/model/exception.constant';
 
 @Injectable()
 export class GoogleClient {
@@ -18,41 +37,46 @@ export class GoogleClient {
 
     const { data } = await firstValueFrom(
       this.httpService
-        .get<any>('https://youtube.googleapis.com/youtube/v3/channels', {
+        .get<any>(YOUTUBE_BASE_URL + CHANNEL_URL, {
           params: {
-            part: 'snippet,statistics,contentDetails',
+            part: CHANEL_PART,
             key: apiKey,
             mine: true,
           },
           headers: {
-            Authorization: `Bearer ${accessToken}`,
-            Accept: 'application/json',
+            Authorization: BEARER + accessToken,
+            Accept: APPLICATION_JSON,
           },
         })
         .pipe(
           catchError((error: AxiosError) => {
             this.logger.error(error.response.data);
-            throw new Error('An error happened!');
+            throw new Error(ERROR_GET_CHANNEL_INFO);
           }),
         ),
     );
 
     const channelInfo = data.items[0];
     if (!channelInfo) {
-      throw new Error('Channel not found!');
+      throw new Error(ERROR_CHANNEL_NOT_FOUND);
     }
 
-    const { viewCount, subscriberCount, videoCount } = channelInfo.statistics;
+    const {
+      viewCount,
+      subscriberCount,
+      videoCount,
+      id,
+      snippet: { thumbnails, title },
+      contentDetails: { relatedPlaylists },
+    } = channelInfo;
 
-    const image = channelInfo.snippet.thumbnails.default.url;
-    const { title } = channelInfo.snippet;
-
-    const playlistId = channelInfo.contentDetails.relatedPlaylists.uploads;
+    const { uploads: playlistId } = relatedPlaylists;
 
     return {
+      id,
       title,
       playlistId,
-      image,
+      image: thumbnails.default.url,
       totalViewCount: +viewCount,
       totalSubscribers: +subscriberCount,
       totalVideos: +videoCount,
@@ -72,23 +96,23 @@ export class GoogleClient {
     do {
       const response = await firstValueFrom(
         this.httpService
-          .get<any>('https://youtube.googleapis.com/youtube/v3/playlistItems', {
+          .get<any>(YOUTUBE_BASE_URL + PLAYLIST_URL, {
             params: {
-              part: 'contentDetails',
+              part: CONTENT_DETAILS,
               key: apiKey,
               playlistId: playlistId,
               maxResults: 50,
               pageToken: nextPageToken,
             },
             headers: {
-              Authorization: `Bearer ${accessToken}`,
-              Accept: 'application/json',
+              Authorization: BEARER + accessToken,
+              Accept: APPLICATION_JSON,
             },
           })
           .pipe(
             catchError((error: AxiosError) => {
               this.logger.error(error.response.data);
-              throw new Error('An error happened!');
+              throw new Error(ERROR_GET_VIDEO_IDS);
             }),
           ),
       );
@@ -106,7 +130,7 @@ export class GoogleClient {
 
     return videoIds;
   }
-  async getVideoStatistics(videoIds: string[], accessToken: string) {
+  async getVideos(videoIds: string[], accessToken: string) {
     const chunkSize = 50;
     const apiKey = this.configService.get<string>('GOOGLE_API_KEY');
     const videoStatistics: any[] = [];
@@ -114,22 +138,22 @@ export class GoogleClient {
       const videoIdsChunk = videoIds.slice(i, i + chunkSize);
       const response = await firstValueFrom(
         this.httpService
-          .get<any>('https://youtube.googleapis.com/youtube/v3/videos', {
+          .get<any>(YOUTUBE_BASE_URL + VIDEO_URL, {
             params: {
-              part: 'statistics',
+              part: STATISTICS,
               key: apiKey,
               id: videoIdsChunk.join(','),
               maxResults: 50,
             },
             headers: {
-              Authorization: `Bearer ${accessToken}`,
-              Accept: 'application/json',
+              Authorization: BEARER + accessToken,
+              Accept: APPLICATION_JSON,
             },
           })
           .pipe(
             catchError((error: AxiosError) => {
               this.logger.error(error.response.data);
-              throw new Error('An error happened!');
+              throw new Error(ERROR_GET_VIDEOS);
             }),
           ),
       );
@@ -155,7 +179,7 @@ export class GoogleClient {
   async getUserInfo(accessToken: string) {
     const response = await firstValueFrom(
       this.httpService
-        .get<any>('https://www.googleapis.com/oauth2/v3/userinfo', {
+        .get<any>(YOUTUBE_OAUTH2_URL + USER_INFO_URL, {
           params: {
             access_token: accessToken,
           },
@@ -163,7 +187,7 @@ export class GoogleClient {
         .pipe(
           catchError((error: AxiosError) => {
             this.logger.error(error.response.data);
-            throw new Error('An error happened!');
+            throw new Error(ERROR_GET_USER_INFO);
           }),
         ),
     );
