@@ -3,7 +3,7 @@ import { HydratedDocument, Types } from 'mongoose';
 import { ChannelType } from 'src/domain/enum/channel-type.enum';
 import { Statistic, StatisticSchema } from './statistic.schema';
 import { Token, TokenSchema } from './token.schema';
-import { Video } from "./video.schema";
+import { Video } from './video.schema';
 
 export type ChannelDocument = HydratedDocument<Channel>;
 
@@ -32,6 +32,12 @@ export class Channel {
 
   @Prop({ type: TokenSchema, required: true })
   token: Token;
+
+  @Prop({ default: false })
+  isChannelConnectUser: boolean;
+
+  @Prop()
+  userId: string;
 }
 
 export const ChannelSchema = SchemaFactory.createForClass(Channel);

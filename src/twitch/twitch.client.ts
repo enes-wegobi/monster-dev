@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { catchError, firstValueFrom } from 'rxjs';
 import { AxiosError } from 'axios';
-import { BEARER, TWITCH } from 'src/domain/model/contstant';
+import { BEARER } from 'src/domain/model/contstant';
 import { ConfigService } from '@nestjs/config';
 import {
   AFTER,
@@ -17,6 +17,7 @@ import {
   ERROR_GET_USER_INFO,
   ERROR_GET_VIDEOS,
 } from '../domain/model/exception.constant';
+import { ChannelType } from '../domain/enum/channel-type.enum';
 
 @Injectable()
 export class TwitchClient {
@@ -36,9 +37,9 @@ export class TwitchClient {
         .pipe(
           catchError((error: AxiosError) => {
             this.logger.error(
-              error.response?.data || TWITCH + ERROR_GET_USER_INFO,
+              error.response?.data || ChannelType.TWITCH + ERROR_GET_USER_INFO,
             );
-            throw new Error(TWITCH + ERROR_GET_USER_INFO);
+            throw new Error(ChannelType.TWITCH + ERROR_GET_USER_INFO);
           }),
         ),
     );
@@ -57,9 +58,10 @@ export class TwitchClient {
         .pipe(
           catchError((error: AxiosError) => {
             this.logger.error(
-              error.response?.data || TWITCH + ERROR_GET_CHANNEL_INFO,
+              error.response?.data ||
+                ChannelType.TWITCH + ERROR_GET_CHANNEL_INFO,
             );
-            throw new Error(TWITCH + ERROR_GET_CHANNEL_INFO);
+            throw new Error(ChannelType.TWITCH + ERROR_GET_CHANNEL_INFO);
           }),
         ),
     );
@@ -112,9 +114,9 @@ export class TwitchClient {
         .pipe(
           catchError((error: AxiosError) => {
             this.logger.error(
-              error.response?.data || TWITCH + ERROR_GET_VIDEOS,
+              error.response?.data || ChannelType.TWITCH + ERROR_GET_VIDEOS,
             );
-            throw new Error(TWITCH + ERROR_GET_VIDEOS);
+            throw new Error(ChannelType.TWITCH + ERROR_GET_VIDEOS);
           }),
         ),
     );

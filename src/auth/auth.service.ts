@@ -15,7 +15,6 @@ import {
   ERROR_TWITCH_AUTH_GENERAL,
   ERROR_TWITCH_USER_NOT_FOUND,
 } from '../domain/model/exception.constant';
-import { GOOGLE, TWITCH } from '../domain/model/contstant';
 
 @Injectable()
 export class AuthService {
@@ -35,14 +34,22 @@ export class AuthService {
       const accessToken = request?.user?.accessToken;
 
       if (!accessToken) {
-        return this.handleAuthError(TWITCH, ERROR_ACCESS_TOKEN_NOT_FOUND);
+        return this.handleAuthError(
+          ChannelType.TWITCH,
+          ERROR_TWITCH_AUTH_GENERAL,
+          ERROR_ACCESS_TOKEN_NOT_FOUND,
+        );
       }
 
       const data = await this.twitchClient.getUser(accessToken);
       const twitchUser = data.data[0];
 
       if (!twitchUser || !twitchUser.email) {
-        return this.handleAuthError(TWITCH, ERROR_TWITCH_USER_NOT_FOUND);
+        return this.handleAuthError(
+          ChannelType.TWITCH,
+          ERROR_TWITCH_AUTH_GENERAL,
+          ERROR_TWITCH_USER_NOT_FOUND,
+        );
       }
 
       const {
@@ -56,8 +63,22 @@ export class AuthService {
         channelEmail,
         ChannelType.TWITCH,
       );
+
       if (channel) {
-        return this.handleAuthError(TWITCH, ERROR_CHANNEL_ALREADY_ADDED);
+        if (!channel.isChannelConnectUser) {
+          return {
+            url: this.generateRedirectUrl(
+              channel._id.toString(),
+              ChannelType.TWITCH,
+            ),
+          };
+        } else {
+          return this.handleAuthError(
+            ChannelType.TWITCH,
+            ERROR_CHANNEL_ALREADY_ADDED,
+            ERROR_CHANNEL_ALREADY_ADDED,
+          );
+        }
       }
 
       const twitchChannelCreateDto: TwitchChannelCreateDto = {
@@ -74,12 +95,17 @@ export class AuthService {
           twitchChannelCreateDto,
         );
 
-      const redirectUrl = this.configService.get<string>('REDIRECT_URL');
-      return { url: redirectUrl + createdChannel._id };
+      return {
+        url: this.generateRedirectUrl(
+          createdChannel._id.toString(),
+          ChannelType.TWITCH,
+        ),
+      };
     } catch (error) {
       return this.handleAuthError(
-        TWITCH,
-        ERROR_TWITCH_AUTH_GENERAL + error.message,
+        ChannelType.TWITCH,
+        ERROR_TWITCH_AUTH_GENERAL,
+        error.message,
       );
     }
   }
@@ -89,7 +115,11 @@ export class AuthService {
       const accessToken = tokens.access_token;
 
       if (!accessToken) {
-        return this.handleAuthError(GOOGLE, ERROR_ACCESS_TOKEN_NOT_FOUND);
+        return this.handleAuthError(
+          ChannelType.YOUTUBE,
+          ERROR_GOOGLE_AUTH_GENERAL,
+          ERROR_ACCESS_TOKEN_NOT_FOUND,
+        );
       }
 
       const googleUser = await this.googleClient.getUserInfo(accessToken);
@@ -99,8 +129,22 @@ export class AuthService {
         channelEmail,
         ChannelType.YOUTUBE,
       );
+
       if (channel) {
-        return this.handleAuthError(GOOGLE, ERROR_CHANNEL_ALREADY_ADDED);
+        if (!channel.isChannelConnectUser) {
+          return {
+            url: this.generateRedirectUrl(
+              channel._id.toString(),
+              ChannelType.YOUTUBE,
+            ),
+          };
+        } else {
+          return this.handleAuthError(
+            ChannelType.YOUTUBE,
+            ERROR_CHANNEL_ALREADY_ADDED,
+            ERROR_CHANNEL_ALREADY_ADDED,
+          );
+        }
       }
 
       const youtubeChannelCreateDto: YoutubeChannelCreateDto = {
@@ -114,20 +158,40 @@ export class AuthService {
           youtubeChannelCreateDto,
         );
 
-      const redirectUrl = this.configService.get<string>('REDIRECT_URL');
-      return { url: redirectUrl + createdChannel._id };
+      return {
+        url: this.generateRedirectUrl(
+          createdChannel._id.toString(),
+          ChannelType.YOUTUBE,
+        ),
+      };
     } catch (error) {
       return this.handleAuthError(
-        GOOGLE,
-        ERROR_GOOGLE_AUTH_GENERAL + error.message,
+        ChannelType.YOUTUBE,
+        ERROR_GOOGLE_AUTH_GENERAL,
+        error.message,
       );
     }
   }
 
-  private handleAuthError(provider: string, message: string) {
-    this.logger.error(`${provider} authentication error: ${message}`);
+  private handleAuthError(provider: string, error: string, logError?: any) {
+    this.logger.error(`${provider} authentication error: ${logError}`);
     return {
-      url: this.configService.get<string>('REDIRECT_URL_NOT_FOUND'),
+      url: this.generateRedirectErrorUrl(error, provider),
     };
+  }
+
+  private generateRedirectErrorUrl(error: string, provider: string): string {
+    return `${this.configService.get<string>(
+      'REDIRECT_URL',
+    )}?error=${error}&channelType=${provider}`;
+  }
+
+  private generateRedirectUrl(
+    channelId: string,
+    channelType: ChannelType,
+  ): string {
+    return `${this.configService.get<string>(
+      'REDIRECT_URL',
+    )}?channelId=${channelId}&channelType=${channelType}`;
   }
 }

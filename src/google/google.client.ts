@@ -18,7 +18,6 @@ import {
   APPLICATION_JSON,
   BEARER,
   CHUNK_SIZE,
-  GOOGLE,
 } from '../domain/model/contstant';
 import {
   ERROR_CHANNEL_NOT_FOUND,
@@ -27,6 +26,7 @@ import {
   ERROR_GET_VIDEO_IDS,
   ERROR_GET_VIDEOS,
 } from '../domain/model/exception.constant';
+import { ChannelType } from '../domain/enum/channel-type.enum';
 
 @Injectable()
 export class GoogleClient {
@@ -53,16 +53,19 @@ export class GoogleClient {
         .pipe(
           catchError((error: AxiosError) => {
             this.logger.error(
-              error.response.data || GOOGLE + ERROR_GET_CHANNEL_INFO,
+              error.response.data ||
+                ChannelType.YOUTUBE + ERROR_GET_CHANNEL_INFO,
             );
-            throw new Error(GOOGLE + ERROR_GET_CHANNEL_INFO);
+            throw new Error(ChannelType.YOUTUBE + ERROR_GET_CHANNEL_INFO);
           }),
         ),
     );
-
-    const channelInfo = data.items[0];
+    let channelInfo: any;
+    if (data.items) {
+      channelInfo = data.items[0];
+    }
     if (!channelInfo) {
-      throw new Error(GOOGLE + ERROR_CHANNEL_NOT_FOUND);
+      throw new Error(ChannelType.YOUTUBE + ERROR_CHANNEL_NOT_FOUND);
     }
 
     const {
@@ -110,9 +113,10 @@ export class GoogleClient {
           .pipe(
             catchError((error: AxiosError) => {
               this.logger.error(
-                error.response.data || GOOGLE + ERROR_GET_VIDEO_IDS,
+                error.response.data ||
+                  ChannelType.YOUTUBE + ERROR_GET_VIDEO_IDS,
               );
-              throw new Error(GOOGLE + ERROR_GET_VIDEO_IDS);
+              throw new Error(ChannelType.YOUTUBE + ERROR_GET_VIDEO_IDS);
             }),
           ),
       );
@@ -149,9 +153,9 @@ export class GoogleClient {
           .pipe(
             catchError((error: AxiosError) => {
               this.logger.error(
-                error.response.data || GOOGLE + ERROR_GET_VIDEOS,
+                error.response.data || ChannelType.YOUTUBE + ERROR_GET_VIDEOS,
               );
-              throw new Error(GOOGLE + ERROR_GET_VIDEOS);
+              throw new Error(ChannelType.YOUTUBE + ERROR_GET_VIDEOS);
             }),
           ),
       );

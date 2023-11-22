@@ -21,7 +21,7 @@ export class User {
   @Prop({ required: true })
   phoneNumber: string;
 
-  @Prop({ required: true })
+  @Prop()
   photo: string;
 
   @Prop()

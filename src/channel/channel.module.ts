@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { ChannelService } from './service/channel.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Channel, ChannelSchema } from '../domain/schema/channel.schema';
@@ -14,7 +14,7 @@ import { VideoModule } from '../video/video.module';
     MongooseModule.forFeature([{ name: Channel.name, schema: ChannelSchema }]),
     TwitchModule,
     GoogleModule,
-    UsersModule,
+    forwardRef(() => UsersModule),
     VideoModule,
   ],
   exports: [

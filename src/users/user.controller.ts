@@ -14,6 +14,7 @@ import { USERS } from '../domain/model/contstant';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  //todo sanitize createUserDto
   @Post()
   create(@Body(new ValidationPipe()) createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);

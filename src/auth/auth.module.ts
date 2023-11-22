@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { TwitchStrategy } from './strategy/twitch.strategy';
 import { AuthController } from './auth.controller';
@@ -14,7 +14,7 @@ import { ChannelModule } from '../channel/channel.module';
     UsersModule,
     TwitchModule,
     GoogleModule,
-    ChannelModule,
+    forwardRef(() => ChannelModule),
   ],
   controllers: [AuthController],
   providers: [TwitchStrategy, AuthService],
