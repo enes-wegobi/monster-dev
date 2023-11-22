@@ -5,22 +5,22 @@ export type VideoDocument = HydratedDocument<Video>;
 
 @Schema({ timestamps: true })
 export class Video {
-  @Prop({ required: true })
+  @Prop()
   externalId: string;
 
-  @Prop({ required: true, default: 0 })
+  @Prop()
   viewCount: number;
 
-  @Prop({ required: true, default: 0 })
+  @Prop()
   likeCount: number;
 
-  @Prop({ required: true, default: 0 })
+  @Prop()
   dislikeCount: number;
 
-  @Prop({ required: true, default: 0 })
+  @Prop()
   favoriteCount: number;
 
-  @Prop({ required: true, default: 0 })
+  @Prop()
   commentCount: number;
 }
 

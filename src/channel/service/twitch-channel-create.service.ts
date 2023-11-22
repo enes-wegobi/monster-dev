@@ -4,6 +4,8 @@ import { TwitchChannelCreateDto } from '../dto/twitch-channel-create.dto';
 import { TwitchClient } from '../../twitch/twitch.client';
 import { CreateChannelDto } from '../dto/create-channel.dto';
 import { ChannelType } from '../../domain/enum/channel-type.enum';
+import { CreateVideoDto } from '../../video/dto/create-video.dto';
+import { VideoService } from '../../video/video.service';
 
 @Injectable()
 export class TwitchChannelCreateService {
@@ -11,6 +13,7 @@ export class TwitchChannelCreateService {
 
   constructor(
     private channelService: ChannelService,
+    private videoService: VideoService,
     private twitchClient: TwitchClient,
   ) {}
 
@@ -25,16 +28,16 @@ export class TwitchChannelCreateService {
       externalId,
     );
 
-    if (!totalFollowersResponse || !channelInfo) {
-      this.logger.error('TWITCH_CHANNEL_CREATE_EVENT: Unable to fetch data');
-      return;
-    }
+    const videoIds = await this.videoService.createAll(
+      this.mapTwitchVideos(channelInfo.videos),
+    );
 
     const channelDto: CreateChannelDto = {
       externalId,
       name,
       channelEmail,
       image,
+      videos: videoIds,
       token: {
         accessToken,
         refreshToken,
@@ -48,5 +51,12 @@ export class TwitchChannelCreateService {
     };
 
     return await this.channelService.create(channelDto);
+  }
+
+  private mapTwitchVideos(twitchVideos: any[]): CreateVideoDto[] {
+    return twitchVideos.map((twitchVideo) => ({
+      externalId: twitchVideo.id,
+      viewCount: twitchVideo.view_count,
+    }));
   }
 }

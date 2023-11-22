@@ -70,6 +70,7 @@ export class TwitchClient {
     let totalViewCount = 0;
     let totalVideos = 0;
     let cursor = null;
+    const allVideos = [];
 
     do {
       const response = await this.getTwitchVideos(
@@ -79,16 +80,16 @@ export class TwitchClient {
       );
       const videos = response.data;
       const pagination = response.pagination;
-
       totalVideos += videos.length;
       videos.forEach((video) => {
         totalViewCount += video.view_count;
+        allVideos.push(video);
       });
 
       cursor = pagination.cursor;
     } while (cursor);
 
-    return { totalViewCount, totalVideos };
+    return { totalViewCount, totalVideos, videos: allVideos };
   }
 
   async getTwitchVideos(

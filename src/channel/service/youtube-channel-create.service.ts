@@ -77,11 +77,17 @@ export class YoutubeChannelCreateService {
   private mapGoogleVideos(googleVideos: any[]): CreateVideoDto[] {
     return googleVideos.map((googleVideo) => ({
       externalId: googleVideo.videoId,
-      viewCount: googleVideo.viewCount,
-      likeCount: googleVideo.likeCount,
-      dislikeCount: googleVideo.dislikeCount,
-      favoriteCount: googleVideo.favoriteCount,
-      commentCount: googleVideo.commentCount,
+      viewCount: googleVideo.viewCount ? googleVideo.viewCount : undefined,
+      likeCount: googleVideo.likeCount ? googleVideo.likeCount : undefined,
+      dislikeCount: googleVideo.dislikeCount
+        ? googleVideo.dislikeCount
+        : undefined,
+      favoriteCount: googleVideo.favoriteCount
+        ? googleVideo.favoriteCount
+        : undefined,
+      commentCount: googleVideo.commentCount
+        ? googleVideo.commentCount
+        : undefined,
     }));
   }
 }

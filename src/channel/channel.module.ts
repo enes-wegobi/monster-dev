@@ -7,6 +7,7 @@ import { UsersModule } from 'src/users/user.module';
 import { GoogleModule } from 'src/google/google.module';
 import { YoutubeChannelCreateService } from './service/youtube-channel-create.service';
 import { TwitchChannelCreateService } from './service/twitch-channel-create.service';
+import { VideoModule } from '../video/video.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { TwitchChannelCreateService } from './service/twitch-channel-create.serv
     TwitchModule,
     GoogleModule,
     UsersModule,
+    VideoModule,
   ],
   exports: [
     ChannelService,

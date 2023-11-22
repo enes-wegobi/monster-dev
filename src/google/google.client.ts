@@ -66,14 +66,11 @@ export class GoogleClient {
     }
 
     const {
-      viewCount,
-      subscriberCount,
-      videoCount,
       id,
       snippet: { thumbnails, title },
       contentDetails: { relatedPlaylists },
     } = channelInfo;
-
+    const { viewCount, subscriberCount, videoCount } = channelInfo.statistics;
     const { uploads: playlistId } = relatedPlaylists;
 
     return {
@@ -165,11 +162,17 @@ export class GoogleClient {
           const statistics = item.statistics;
           videoStatistics.push({
             videoId,
-            viewCount: +statistics.viewCount,
-            likeCount: +statistics.likeCount,
-            dislikeCount: +statistics.dislikeCount,
-            favoriteCount: +statistics.favoriteCount,
-            commentCount: +statistics.commentCount,
+            viewCount: statistics.viewCount ? +statistics.viewCount : undefined,
+            likeCount: statistics.likeCount ? +statistics.likeCount : undefined,
+            dislikeCount: statistics.dislikeCount
+              ? +statistics.dislikeCount
+              : undefined,
+            favoriteCount: statistics.favoriteCount
+              ? +statistics.favoriteCount
+              : undefined,
+            commentCount: statistics.commentCount
+              ? +statistics.commentCount
+              : undefined,
           });
         });
       }

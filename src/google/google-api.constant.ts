@@ -1,5 +1,5 @@
 export const YOUTUBE_BASE_URL = 'https://youtube.googleapis.com/youtube/';
-export const YOUTUBE_OAUTH2_URL = 'https://www.googleapis.com/oauth2/ ';
+export const YOUTUBE_OAUTH2_URL = 'https://www.googleapis.com/oauth2/';
 export const USER_INFO_URL = 'v3/userinfo';
 export const CHANNEL_URL = 'v3/channels';
 export const PLAYLIST_URL = 'v3/playlistItems';
