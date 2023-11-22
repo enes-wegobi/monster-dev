@@ -8,6 +8,14 @@ import { YoutubeChannelCreateService } from '../channel/service/youtube-channel-
 import { YoutubeChannelCreateDto } from '../channel/dto/youtube-channel-create.dto';
 import { ChannelService } from '../channel/service/channel.service';
 import { ChannelType } from '../domain/enum/channel-type.enum';
+import {
+  ERROR_ACCESS_TOKEN_NOT_FOUND,
+  ERROR_CHANNEL_ALREADY_ADDED,
+  ERROR_GOOGLE_AUTH_GENERAL,
+  ERROR_TWITCH_AUTH_GENERAL,
+  ERROR_TWITCH_USER_NOT_FOUND,
+} from '../domain/model/exception.constant';
+import { GOOGLE, TWITCH } from '../domain/model/contstant';
 
 @Injectable()
 export class AuthService {
@@ -23,60 +31,67 @@ export class AuthService {
   ) {}
 
   async handleTwitchAuth(request: any) {
-    const accessToken = request?.user?.accessToken;
+    try {
+      const accessToken = request?.user?.accessToken;
 
-    if (!accessToken) {
-      return this.configService.get<string>('REDIRECT_URL_NOT_FOUND');
-    }
+      if (!accessToken) {
+        return this.handleAuthError(TWITCH, ERROR_ACCESS_TOKEN_NOT_FOUND);
+      }
 
-    const twitchUser = await this.getTwitchUser(accessToken);
+      const data = await this.twitchClient.getUser(accessToken);
+      const twitchUser = data.data[0];
 
-    if (!twitchUser || !twitchUser.email) {
-      return this.configService.get<string>('REDIRECT_URL_NOT_FOUND');
-    }
+      if (!twitchUser || !twitchUser.email) {
+        return this.handleAuthError(TWITCH, ERROR_TWITCH_USER_NOT_FOUND);
+      }
 
-    const {
-      id: externalId,
-      email: channelEmail,
-      profile_image_url: image,
-      login: name,
-    } = twitchUser;
+      const {
+        id: externalId,
+        email: channelEmail,
+        profile_image_url: image,
+        login: name,
+      } = twitchUser;
 
-    const channel = await this.channelService.doesChannelExist(
-      channelEmail,
-      ChannelType.TWITCH,
-    );
-    if (channel) {
-      this.logger.log('channel already added.');
-      return this.configService.get<string>('REDIRECT_URL_NOT_FOUND');
-    }
-
-    const twitchChannelCreateDto: TwitchChannelCreateDto = {
-      accessToken,
-      refreshToken: request?.user?.refreshToken,
-      externalId,
-      name,
-      channelEmail,
-      image,
-    };
-
-    const createdChannel =
-      await this.twitchChannelCreateService.createTwitchChannel(
-        twitchChannelCreateDto,
+      const channel = await this.channelService.doesChannelExist(
+        channelEmail,
+        ChannelType.TWITCH,
       );
+      if (channel) {
+        return this.handleAuthError(TWITCH, ERROR_CHANNEL_ALREADY_ADDED);
+      }
 
-    const redirectUrl = this.configService.get<string>('REDIRECT_URL');
-    return { url: redirectUrl + createdChannel._id };
-  }
+      const twitchChannelCreateDto: TwitchChannelCreateDto = {
+        accessToken,
+        refreshToken: request?.user?.refreshToken,
+        externalId,
+        name,
+        channelEmail,
+        image,
+      };
 
-  private async getTwitchUser(accessToken: string) {
-    const data = await this.twitchClient.getUser(accessToken);
-    return data.data[0];
+      const createdChannel =
+        await this.twitchChannelCreateService.createTwitchChannel(
+          twitchChannelCreateDto,
+        );
+
+      const redirectUrl = this.configService.get<string>('REDIRECT_URL');
+      return { url: redirectUrl + createdChannel._id };
+    } catch (error) {
+      return this.handleAuthError(
+        TWITCH,
+        ERROR_TWITCH_AUTH_GENERAL + error.message,
+      );
+    }
   }
 
   async handleGoogleAuth(tokens: any) {
-    const accessToken = tokens.access_token;
-    if (accessToken) {
+    try {
+      const accessToken = tokens.access_token;
+
+      if (!accessToken) {
+        return this.handleAuthError(GOOGLE, ERROR_ACCESS_TOKEN_NOT_FOUND);
+      }
+
       const googleUser = await this.googleClient.getUserInfo(accessToken);
       const { email: channelEmail, picture: image } = googleUser;
 
@@ -85,8 +100,7 @@ export class AuthService {
         ChannelType.YOUTUBE,
       );
       if (channel) {
-        this.logger.log('channel already added.');
-        return this.configService.get<string>('REDIRECT_URL_NOT_FOUND');
+        return this.handleAuthError(GOOGLE, ERROR_CHANNEL_ALREADY_ADDED);
       }
 
       const youtubeChannelCreateDto: YoutubeChannelCreateDto = {
@@ -102,8 +116,18 @@ export class AuthService {
 
       const redirectUrl = this.configService.get<string>('REDIRECT_URL');
       return { url: redirectUrl + createdChannel._id };
-    } else {
-      return { url: this.configService.get<string>('REDIRECT_URL_NOT_FOUND') };
+    } catch (error) {
+      return this.handleAuthError(
+        GOOGLE,
+        ERROR_GOOGLE_AUTH_GENERAL + error.message,
+      );
     }
+  }
+
+  private handleAuthError(provider: string, message: string) {
+    this.logger.error(`${provider} authentication error: ${message}`);
+    return {
+      url: this.configService.get<string>('REDIRECT_URL_NOT_FOUND'),
+    };
   }
 }

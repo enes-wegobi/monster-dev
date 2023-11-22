@@ -19,11 +19,6 @@ export class YoutubeChannelCreateService {
   async createYoutubeChannel(youtubeChannelCreateDto: YoutubeChannelCreateDto) {
     const { accessToken, image, channelEmail } = youtubeChannelCreateDto;
 
-    if (!accessToken) {
-      this.logger.error('YOUTUBE_CHANNEL_CREATE_EVENT there is no accessToken');
-      return;
-    }
-
     const youtubeChannel = await this.googleClient.getChannelInfo(accessToken);
     const {
       id: externalId,

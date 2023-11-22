@@ -22,7 +22,7 @@ export class GoogleOAuth2Client {
       scope: scopes,
     });
   }
-  async getToken(code) {
+  async getToken(code: string) {
     return await this.oauth2Client.getToken(code);
   }
 }
